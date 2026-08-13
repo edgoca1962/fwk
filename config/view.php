@@ -34,16 +34,16 @@ return [
    /*
     * Templates globales.
     */
-   't_navbar' => '',
-   't_banner' => '',
+   't_navbar' => 'modules/core/view/navbar',
+   't_banner' => 'modules/core/view/banner',
    't_asideL' => '',
    't_postheader' => '',
-   't_main' => '',
+   't_main' => 'modules/core/view/content',
    't_postfooter' => '',
    't_none' => 'modules/core/view/none',
    't_asideR' => '',
    't_comments' => '',
-   't_footer' => '',
+   't_footer' => 'modules/core/view/footer',
    't_btn_cita' => '',
 
    /*

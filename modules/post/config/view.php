@@ -44,24 +44,6 @@ return [
          'paginacion' => true,
       ],
 
-      'principal' => [
-         'header' => '',
-         'div1' => '',
-         'div2' => '',
-         'asideL' => '',
-         'asideR' => '',
-         'main' => '',
-         'article' => '',
-         'pagination' => '',
-         'paginacion' => false,
-         't_banner' => '',
-         't_asideL' => '',
-         't_main' => 'modules/post/view/principal',
-         't_asideR' => '',
-         't_footer' => '',
-         'titulo' => '',
-         'show_content' => false,
-      ],
    ],
 
    /*

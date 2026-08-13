@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+if (!defined('ABSPATH')) {
+   exit;
+}
+
+return [
+   'login' => [
+      't_main' =>
+         'modules/core/view/login',
+
+      'paginacion' => false,
+
+      'show_content' => false,
+   ],
+];

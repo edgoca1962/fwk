@@ -227,6 +227,33 @@ final class Core
       ViewContext $view,
       RequestContext $request
    ): void {
+      $corePagesFile = get_template_directory()
+         . '/modules/core/config/pages.php';
+
+      $corePages = [];
+
+      if (is_readable($corePagesFile)) {
+         $loadedPages = require $corePagesFile;
+
+         if (is_array($loadedPages)) {
+            $corePages = $loadedPages;
+         }
+      }
+
+      $pageSlug = $request->get_page_slug();
+
+      if (
+         $pageSlug !== ''
+         && isset($corePages[$pageSlug])
+      ) {
+         $view->merge(
+            $corePages[$pageSlug],
+            'core:page:' . $pageSlug
+         );
+
+         return;
+      }
+
       if ($request->is_404()) {
          $view->merge([
             'titulo' => __('Página no encontrada', 'FWK'),

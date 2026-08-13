@@ -26,27 +26,26 @@ class WPSetup
       add_theme_support('title-tag');
       add_theme_support('automatic-feed-links');
       add_theme_support('post-thumbnails');
-      add_theme_support('post-formats', array('aside', 'gallery', 'quote', 'image', 'video'));
-      add_theme_support('html5', array('search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script'));
+      add_theme_support('post-formats', ['aside', 'gallery', 'quote', 'image', 'video']);
+      add_theme_support('html5', ['search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script']);
       add_theme_support('customize-selective-refresh-widgets');
       add_theme_support('wp-block-styles');
       add_theme_support('block-templates');
       add_theme_support('align-wide');
-      add_theme_support('custom-logo', array('height' => 300, 'width' => 300, 'flex-width' => true, 'flex-height' => true, ));
+      add_theme_support('custom-logo', ['height' => 300, 'width' => 300, 'flex-width' => true, 'flex-height' => true,]);
       register_nav_menus(
-         array(
-            'principal' => __('Menu Principal', 'FWK'),
-            'administrador' => __('Menu Administrador', 'FWK'),
-            'logout' => __('Menu Loged Out', 'FWK'),
-         )
+         [
+            'principal' => __(
+               'Menu Principal',
+               'FWK'
+            ),
+            'publico' => __(
+               'Menú público',
+               'FWK'
+            ),
+         ]
       );
 
-      update_option('adminRoles', false);
-      if (!get_option('adminRoles')) {
-         $base_caps = get_role('subscriber')->capabilities;
-         $base_caps['useradmingeneral'] = true;
-         add_role('useradmingeneral', 'Administrador(a) General', $base_caps);
-      }
    }
    public function SGF_register_scripts_styles_local()
    {
