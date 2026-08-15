@@ -15,4 +15,12 @@ return [
 
       'show_content' => false,
    ],
+   'solicitar-ingreso' => [
+      't_main' =>
+         'modules/core/view/solicitar-ingreso',
+
+      'paginacion' => false,
+
+      'show_content' => false,
+   ],
 ];

@@ -62,7 +62,9 @@ final class AuthService
             ?? ''
          ),
 
-         'remember' => true,
+         'remember' => isset(
+            $_POST['remember']
+         ),
       ];
 
       return wp_signon(
@@ -79,23 +81,96 @@ final class AuthService
     */
    public function handle_login(): string
    {
-      if (
-         !$this->is_login_submitted()
-         || !$this->is_login_nonce_valid()
-      ) {
+      if (!$this->is_login_submitted()) {
          return '';
+      }
+
+      if (!$this->is_login_nonce_valid()) {
+         return __(
+            'No fue posible validar la solicitud. Por favor, recargue la página e inténtelo nuevamente.',
+            'FWK'
+         );
       }
 
       $user = $this->login();
 
       if (is_wp_error($user)) {
-         return $user->get_error_message();
+         return __(
+            'El usuario o la contraseña ingresados no son correctos.',
+            'FWK'
+         );
       }
+      if (!$this->can_user_login($user)) {
 
+         wp_logout();
+
+         return __(
+            'Su cuenta todavía no se encuentra habilitada para ingresar al sistema.',
+            'FWK'
+         );
+      }
       wp_safe_redirect(
          home_url('/')
       );
 
       exit;
+   }
+   /**
+    * Indica si existe un usuario autenticado.
+    */
+   public function is_authenticated(): bool
+   {
+      return is_user_logged_in();
+   }
+   /**
+    * Devuelve el usuario ingresado en el formulario.
+    */
+   public function get_submitted_user(): string
+   {
+      if (!isset($_POST['user_login'])) {
+         return '';
+      }
+
+      return sanitize_text_field(
+         wp_unslash(
+            $_POST['user_login']
+         )
+      );
+   }
+   /**
+    * Indica si el usuario marcó "Recordarme".
+    */
+   public function is_remember_requested(): bool
+   {
+      return isset(
+         $_POST['remember']
+      );
+   }
+   /**
+    * Determina si el usuario tiene permitido ingresar.
+    */
+   public function can_user_login(
+      \WP_User $user
+   ): bool {
+      /*
+       * El administrador nativo de WordPress
+       * siempre tiene acceso.
+       */
+      if (
+         user_can(
+            $user,
+            'manage_options'
+         )
+      ) {
+         return true;
+      }
+
+      $status = (string) get_user_meta(
+         $user->ID,
+         'fwk_account_status',
+         true
+      );
+
+      return $status === 'active';
    }
 }
