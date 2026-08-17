@@ -255,8 +255,7 @@ final class UserRequestService
          return $result;
       }
 
-      $userId =
-         $this->create_pending_user();
+      $userId = $this->create_pending_user();
 
       if (is_wp_error($userId)) {
          $result['errors'][] =

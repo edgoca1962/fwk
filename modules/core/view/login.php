@@ -8,6 +8,7 @@ if (!defined('ABSPATH')) {
 }
 
 $auth = new AuthService();
+
 if ($auth->is_authenticated()) {
    wp_safe_redirect(
       home_url('/')
@@ -17,7 +18,6 @@ if ($auth->is_authenticated()) {
 }
 
 $loginError = $auth->handle_login();
-
 $loginUser = $auth->get_submitted_user();
 $rememberChecked = $auth->is_remember_requested();
 
@@ -66,10 +66,7 @@ $rememberChecked = $auth->is_remember_requested();
             <div class="mb-3">
 
                <label for="fwk-login-password" class="form-label">
-                  <?= esc_html__(
-                     'Contraseña',
-                     'FWK'
-                  ); ?>
+                  <?= esc_html__('Contraseña', 'FWK'); ?>
                </label>
 
                <input type="password" class="form-control" id="fwk-login-password" name="user_password"
@@ -82,10 +79,7 @@ $rememberChecked = $auth->is_remember_requested();
                   <?= checked($rememberChecked, true, false); ?>>
 
                <label class="form-check-label" for="fwk-login-remember">
-                  <?= esc_html__(
-                     'Recordarme',
-                     'FWK'
-                  ); ?>
+                  <?= esc_html__('Recordarme', 'FWK'); ?>
                </label>
 
             </div>
@@ -93,10 +87,7 @@ $rememberChecked = $auth->is_remember_requested();
             <div class="d-grid">
 
                <button type="submit" class="btn btn-primary">
-                  <?= esc_html__(
-                     'Ingresar',
-                     'FWK'
-                  ); ?>
+                  <?= esc_html__('Ingresar', 'FWK'); ?>
                </button>
 
             </div>
@@ -109,20 +100,12 @@ $rememberChecked = $auth->is_remember_requested();
                   home_url('/login')
                )
             ); ?>">
-               <?= esc_html__(
-                  '¿Olvidó su contraseña?',
-                  'FWK'
-               ); ?>
+               <?= esc_html__('¿Olvidó su contraseña?', 'FWK'); ?>
             </a>
             <div class="mt-2 text-center">
 
-               <a href="<?= esc_url(
-                  home_url('/solicitar-ingreso')
-               ); ?>">
-                  <?= esc_html__(
-                     'Solicitar ingreso',
-                     'FWK'
-                  ); ?>
+               <a href="<?= esc_url(home_url('/solicitar-ingreso')); ?>">
+                  <?= esc_html__('Solicitar ingreso', 'FWK'); ?>
                </a>
 
             </div>

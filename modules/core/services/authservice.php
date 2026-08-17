@@ -73,49 +73,6 @@ final class AuthService
       );
    }
    /**
-    * Procesa completamente el intento de login.
-    *
-    * Devuelve:
-    * - string vacío si el login fue exitoso.
-    * - mensaje de error si falló.
-    */
-   public function handle_login(): string
-   {
-      if (!$this->is_login_submitted()) {
-         return '';
-      }
-
-      if (!$this->is_login_nonce_valid()) {
-         return __(
-            'No fue posible validar la solicitud. Por favor, recargue la página e inténtelo nuevamente.',
-            'FWK'
-         );
-      }
-
-      $user = $this->login();
-
-      if (is_wp_error($user)) {
-         return __(
-            'El usuario o la contraseña ingresados no son correctos.',
-            'FWK'
-         );
-      }
-      if (!$this->can_user_login($user)) {
-
-         wp_logout();
-
-         return __(
-            'Su cuenta todavía no se encuentra habilitada para ingresar al sistema.',
-            'FWK'
-         );
-      }
-      wp_safe_redirect(
-         home_url('/')
-      );
-
-      exit;
-   }
-   /**
     * Indica si existe un usuario autenticado.
     */
    public function is_authenticated(): bool
@@ -172,5 +129,48 @@ final class AuthService
       );
 
       return $status === 'active';
+   }
+   /**
+    * Procesa completamente el intento de login.
+    *
+    * Devuelve:
+    * - string vacío si el login fue exitoso.
+    * - mensaje de error si falló.
+    */
+   public function handle_login(): string
+   {
+      if (!$this->is_login_submitted()) {
+         return '';
+      }
+
+      if (!$this->is_login_nonce_valid()) {
+         return __(
+            'No fue posible validar la solicitud. Por favor, recargue la página e inténtelo nuevamente.',
+            'FWK'
+         );
+      }
+
+      $user = $this->login();
+
+      if (is_wp_error($user)) {
+         return __(
+            'El usuario o la contraseña ingresados no son correctos.',
+            'FWK'
+         );
+      }
+      if (!$this->can_user_login($user)) {
+
+         wp_logout();
+
+         return __(
+            'Su cuenta todavía no se encuentra habilitada para ingresar al sistema.',
+            'FWK'
+         );
+      }
+      wp_safe_redirect(
+         home_url('/')
+      );
+
+      exit;
    }
 }
