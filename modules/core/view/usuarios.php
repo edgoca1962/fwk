@@ -8,19 +8,35 @@ if (!defined('ABSPATH')) {
    exit;
 }
 
-$userService = new UserService();
+$userService =
+   new UserService();
 
-if (!$userService->can_manage_users()) {
-   wp_safe_redirect(
-      home_url('/')
-   );
+$pageData =
+   $userService->prepare_management_page();
 
-   exit;
-}
+$messages =
+   $pageData['messages'];
 
-$activationResult = $userService->handle_activation();
-$pendingUsers = $userService->get_management_data()['pending_users'];
+$pendingUsers =
+   $pageData['users']['pending'];
 
+$activeUsers =
+   $pageData['users']['active'];
+
+$rejectedUsers =
+   $pageData['users']['rejected'];
+
+$suspendedUsers =
+   $pageData['users']['suspended'];
+
+$user = get_user_by('id', 18);
+print_r($user->roles);
+echo '<br>';
+
+print_r(user_can(
+   $user,
+   'fwk_manage_users'
+));
 ?>
 
 <section class="container py-5">
@@ -37,45 +53,15 @@ $pendingUsers = $userService->get_management_data()['pending_users'];
             <?= esc_html__('Solicitudes pendientes', 'FWK'); ?>
          </h2>
 
-         <?php if ($activationResult['message'] !== ''): ?>
-
-            <div class="alert <?= $activationResult['success']
-               ? 'alert-success'
-               : 'alert-danger'; ?> alert-dismissible fade show">
-               <?= esc_html(
-                  $activationResult['message']
-               ); ?>
-            </div>
-
-         <?php endif; ?>
-
-         <?php if (
-            $activationResult['success']
-            && $activationResult['reset_url'] !== ''
-         ): ?>
-
-            <div class="alert alert-warning">
-
-               <p class="mb-2">
-                  <?= esc_html__(
-                     'Enlace temporal para establecer contraseña:',
-                     'FWK'
-                  ); ?>
-               </p>
-
-               <a href="<?= esc_url(
-                  $activationResult['reset_url']
-               ); ?>" target="_blank" rel="noopener">
-                  <?= esc_html__(
-                     'Abrir enlace de restablecimiento',
-                     'FWK'
-                  ); ?>
-               </a>
-
-            </div>
-
-         <?php endif; ?>
-
+         <?php
+         get_template_part(
+            'modules/core/view/partials/user-messages',
+            null,
+            [
+               'messages' => $messages,
+            ]
+         );
+         ?>
 
          <?php if ($pendingUsers === []): ?>
 
@@ -127,27 +113,35 @@ $pendingUsers = $userService->get_management_data()['pending_users'];
                            </td>
                            <td>
 
-                              <form method="post">
+                              <?php
+                              get_template_part(
+                                 'modules/core/view/partials/user-approve',
+                                 null,
+                                 [
+                                    'user_id' => $user['id'],
+                                 ]
+                              );
+                              ?>
 
-                                 <?php
-                                 wp_nonce_field(
-                                    'fwk_activate_user',
-                                    'fwk_activate_user_nonce'
-                                 );
-                                 ?>
+                              <?php
+                              get_template_part(
+                                 'modules/core/view/partials/user-reject',
+                                 null,
+                                 [
+                                    'user_id' => $user['id'],
+                                 ]
+                              );
+                              ?>
 
-                                 <input type="hidden" name="user_id" value="<?= esc_attr(
-                                    (string) $user['id']
-                                 ); ?>">
-
-                                 <button type="submit" class="btn btn-success btn-sm">
-                                    <?= esc_html__(
-                                       'Aprobar',
-                                       'FWK'
-                                    ); ?>
-                                 </button>
-
-                              </form>
+                              <?php
+                              get_template_part(
+                                 'modules/core/view/partials/user-suspend',
+                                 null,
+                                 [
+                                    'user_id' => $user['id'],
+                                 ]
+                              );
+                              ?>
 
                            </td>
 
@@ -163,6 +157,86 @@ $pendingUsers = $userService->get_management_data()['pending_users'];
 
          <?php endif; ?>
 
+         <section class="mt-5">
+
+            <h2 class="h4 mb-3">
+               <?= esc_html__(
+                  'Usuarios activos',
+                  'FWK'
+               ); ?>
+            </h2>
+
+            <?php
+            get_template_part(
+               'modules/core/view/partials/user-status-table',
+               null,
+               [
+                  'users' =>
+                     $activeUsers,
+
+                  'empty_message' => __(
+                     'No existen usuarios activos.',
+                     'FWK'
+                  ),
+               ]
+            );
+            ?>
+
+         </section>
+
+         <section class="mt-5">
+
+            <h2 class="h4 mb-3">
+               <?= esc_html__(
+                  'Usuarios rechazados',
+                  'FWK'
+               ); ?>
+            </h2>
+
+            <?php
+            get_template_part(
+               'modules/core/view/partials/user-status-table',
+               null,
+               [
+                  'users' =>
+                     $rejectedUsers,
+
+                  'empty_message' => __(
+                     'No existen usuarios rechazados.',
+                     'FWK'
+                  ),
+               ]
+            );
+            ?>
+
+         </section>
+
+         <section class="mt-5">
+
+            <h2 class="h4 mb-3">
+               <?= esc_html__(
+                  'Usuarios suspendidos',
+                  'FWK'
+               ); ?>
+            </h2>
+
+            <?php
+            get_template_part(
+               'modules/core/view/partials/user-status-table',
+               null,
+               [
+                  'users' =>
+                     $suspendedUsers,
+
+                  'empty_message' => __(
+                     'No existen usuarios suspendidos.',
+                     'FWK'
+                  ),
+               ]
+            );
+            ?>
+
+         </section>
       </div>
 
    </div>

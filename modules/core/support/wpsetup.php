@@ -3,6 +3,7 @@
 namespace FWK\Modules\Core\Support;
 
 use FWK\Modules\Core\Support\Singleton;
+use FWK\Modules\Core\Services\CapabilityService;
 
 /**
  * Configuración de Wordpress
@@ -16,7 +17,7 @@ class WPSetup
    use Singleton;
    private function __construct()
    {
-      add_action('wp_enqueue_scripts', [$this, 'SGF_register_scripts_styles_local']);
+      add_action('wp_enqueue_scripts', [$this, 'FWK_register_scripts_styles_local']);
       add_action('after_setup_theme', [$this, 'setup_theme']);
 
    }
@@ -43,11 +44,30 @@ class WPSetup
                'Menú público',
                'FWK'
             ),
+            'modules_admin' => __(
+               'Menú Administrador de módulos',
+               'FWK'
+            ),
+            'general_admin' => __(
+               'Menú Administrador General',
+               'FWK'
+            ),
+            'wp_admin' => __(
+               'Menú Administrador de Wordpress',
+               'FWK'
+            ),
          ]
       );
+      $capabilities =
+         new CapabilityService();
 
+      $capabilities
+         ->register_base_roles();
+
+      $capabilities
+         ->register_base_capabilities();
    }
-   public function SGF_register_scripts_styles_local()
+   public function FWK_register_scripts_styles_local()
    {
       $font_families = [
          'family=Syne:wght@400..800',
@@ -62,7 +82,7 @@ class WPSetup
 
       wp_localize_script(
          'main-script',
-         'SGF_AJAX',
+         'FWK_AJAX',
          [
             'endpoint' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('post_abc'),
