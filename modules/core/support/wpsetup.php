@@ -4,6 +4,8 @@ namespace FWK\Modules\Core\Support;
 
 use FWK\Modules\Core\Support\Singleton;
 use FWK\Modules\Core\Services\CapabilityService;
+use FWK\Modules\Core\Services\ProvisioningService;
+use FWK\Modules\Core\Services\NavigationService;
 
 /**
  * Configuración de Wordpress
@@ -19,7 +21,9 @@ class WPSetup
    {
       add_action('wp_enqueue_scripts', [$this, 'FWK_register_scripts_styles_local']);
       add_action('after_setup_theme', [$this, 'setup_theme']);
-
+      add_action('after_switch_theme', [$this, 'provision_theme']);
+      $navigation = new NavigationService();
+      add_filter('wp_nav_menu_items', [$navigation, 'filter_public_menu_items'], 10, 2);
    }
    public function setup_theme(): void
    {
@@ -89,5 +93,16 @@ class WPSetup
             'home' => esc_url('/')
          ]
       );
+   }
+   /**
+    * Provisiona la estructura base del tema
+    * cuando FWK es activado.
+    */
+   public function provision_theme(): void
+   {
+      $provisioning =
+         new ProvisioningService();
+
+      $provisioning->provision();
    }
 }

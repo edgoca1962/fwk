@@ -7,7 +7,9 @@ if (!defined('ABSPATH')) {
 }
 
 use FWK\Modules\Core\Support\WalkerNav;
-
+use FWK\Modules\Core\Services\NavigationService;
+$navigation =
+   new NavigationService();
 
 ?>
 
@@ -15,7 +17,7 @@ use FWK\Modules\Core\Support\WalkerNav;
    <div class="container">
 
       <a class="navbar-brand" href="<?= esc_url(
-         home_url('/')
+         $navigation->get_home_url()
       ); ?>">
          <?= esc_html(
             get_bloginfo('name')
@@ -32,34 +34,18 @@ use FWK\Modules\Core\Support\WalkerNav;
 
       <div class="collapse navbar-collapse" id="fwk-navbar">
 
-         <?php if (is_user_logged_in()): ?>
+         <?php
+         wp_nav_menu([
+            'theme_location' => 'publico',
+            'container' => false,
+            'menu_class' =>
+               'navbar-nav ms-auto mb-2 mb-lg-0',
+            'fallback_cb' => false,
+            'walker' => new WalkerNav(),
+         ]);
+         ?>
 
-            <?php
-            wp_nav_menu([
-               'theme_location' => 'principal',
-               'container' => false,
-               'menu_class' =>
-                  'navbar-nav ms-auto mb-2 mb-lg-0',
-               'fallback_cb' => false,
-               'walker' => new WalkerNav(),
-            ]);
-            ?>
-
-         <?php else: ?>
-
-            <?php
-            wp_nav_menu([
-               'theme_location' => 'publico',
-               'container' => false,
-               'menu_class' =>
-                  'navbar-nav ms-auto mb-2 mb-lg-0',
-               'fallback_cb' => false,
-               'walker' => new WalkerNav(),
-            ]);
-            ?>
-
-         <?php endif; ?>
       </div>
-   
+
    </div>
 </nav>

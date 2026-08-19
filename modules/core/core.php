@@ -10,6 +10,7 @@ use FWK\Modules\Core\Contracts\ModuleInterface;
 use FWK\Modules\Core\Registry\ModuleRegistry;
 use FWK\Modules\Core\Support\Singleton;
 use FWK\Modules\Core\Support\WPSetup;
+use FWK\Modules\Core\Services\NavigationService;
 use FWK\Modules\Core\Debug\DebugInspector;
 
 if (!defined('ABSPATH')) {
@@ -253,6 +254,8 @@ final class Core
 
          return;
       }
+      $navigation =
+         new NavigationService();
 
       if ($request->is_404()) {
          $view->merge([
@@ -260,7 +263,9 @@ final class Core
             'display' => 'display-6',
             'subtitulo' => sprintf(
                '<a href="%s" class="enlaceBlanco">%s</a>',
-               esc_url(home_url('/')),
+               esc_url(
+                  $navigation->get_home_url()
+               ),
                esc_html__('Volver al inicio', 'FWK')
             ),
             'displaysub' => '',

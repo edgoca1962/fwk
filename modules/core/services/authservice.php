@@ -14,6 +14,33 @@ if (!defined('ABSPATH')) {
 final class AuthService
 {
    /**
+    * Configuración global de la aplicación.
+    *
+    * @var array<string, mixed>
+    */
+   private array $config = [];
+
+   public function __construct()
+   {
+      $appConfig =
+         new AppConfigService();
+
+      $this->config =
+         $appConfig->all();
+   }
+   /**
+    * Devuelve la ruta inicial
+    * para usuarios autenticados.
+    */
+   public function get_authenticated_home(): string
+   {
+      return (string) (
+         $this->config['authenticated']['home']
+         ?? '/'
+      );
+   }
+
+   /**
     * Indica si el formulario de login fue enviado.
     */
    public function is_login_submitted(): bool
@@ -167,8 +194,15 @@ final class AuthService
             'FWK'
          );
       }
+      $authenticatedHome = (string) (
+         $this->config['authenticated']['home']
+         ?? '/'
+      );
+
       wp_safe_redirect(
-         home_url('/')
+         home_url(
+            $authenticatedHome
+         )
       );
 
       exit;

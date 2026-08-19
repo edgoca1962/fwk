@@ -11,7 +11,9 @@ $auth = new AuthService();
 
 if ($auth->is_authenticated()) {
    wp_safe_redirect(
-      home_url('/')
+      home_url(
+         $auth->get_authenticated_home()
+      )
    );
 
    exit;

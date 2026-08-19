@@ -15,6 +15,22 @@ if (!defined('ABSPATH')) {
 final class UserService
 {
    /**
+    * Configuración global de la aplicación.
+    *
+    * @var array<string, mixed>
+    */
+   private array $config = [];
+
+   public function __construct()
+   {
+      $appConfig =
+         new AppConfigService();
+
+      $this->config =
+         $appConfig->all();
+   }
+
+   /**
     * Convierte un usuario de WordPress
     * en un registro preparado para presentación.
     *
@@ -787,8 +803,19 @@ final class UserService
    public function prepare_management_page(): array
    {
       if (!$this->can_manage_users()) {
+
+         $home = is_user_logged_in()
+            ? (string) (
+               $this->config['authenticated']['home']
+               ?? '/'
+            )
+            : (string) (
+               $this->config['public']['home']
+               ?? '/'
+            );
+
          wp_safe_redirect(
-            home_url('/')
+            home_url($home)
          );
 
          exit;
