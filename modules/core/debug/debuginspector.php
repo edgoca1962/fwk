@@ -8,13 +8,12 @@ use FWK\Modules\Core\Context\RequestContext;
 use FWK\Modules\Core\Context\ViewContext;
 use FWK\Modules\Core\Core;
 use FWK\Modules\Core\Contracts\ModuleInterface;
+use FWK\Modules\Core\Registry\MetaBoxRegistry;
+use FWK\Modules\Core\Registry\MetaRegistry;
 use FWK\Modules\Core\Registry\ModuleRegistry;
-use FWK\Modules\Core\Support\Singleton;
 use FWK\Modules\Core\Registry\PostTypeRegistry;
 use FWK\Modules\Core\Registry\TaxonomyRegistry;
-use FWK\Modules\Core\Registry\MetaRegistry;
-use FWK\Modules\Core\Registry\MetaBoxRegistry;
-use FWK\Modules\SGF\Service\OwnershipService;
+use FWK\Modules\Core\Support\Singleton;
 
 if (!defined('ABSPATH')) {
    exit;
@@ -23,8 +22,9 @@ if (!defined('ABSPATH')) {
 /**
  * Panel de diagnóstico de WP FRW.
  *
- * Muestra información del kernel, módulos, solicitud
- * y contexto visual durante el desarrollo.
+ * Muestra información del kernel, módulos,
+ * solicitud y contexto visual durante
+ * el desarrollo.
  *
  * @package FWK
  */
@@ -40,22 +40,25 @@ final class DebugInspector
    private array $config = [];
 
    /**
-    * Momento aproximado de inicialización del Inspector.
+    * Momento aproximado de inicialización
+    * del Inspector.
     */
    private float $startedAt;
 
    protected function __construct()
    {
-      $this->startedAt = microtime(true);
+      $this->startedAt =
+         microtime(true);
 
-      $this->config = $this->load_config();
+      $this->config =
+         $this->load_config();
 
       /*
        * Registramos siempre el callback.
        *
-       * La validación de WP_DEBUG, configuración y permisos
-       * se realizará cuando WordPress ejecute wp_footer,
-       * momento en el que el usuario ya está completamente resuelto.
+       * La validación de WP_DEBUG,
+       * configuración y permisos se realizará
+       * cuando WordPress ejecute wp_footer.
        */
       add_action(
          'wp_footer',
@@ -63,6 +66,7 @@ final class DebugInspector
          9999
       );
    }
+
    /**
     * Determina si el Inspector puede mostrarse.
     */
@@ -75,23 +79,34 @@ final class DebugInspector
          return false;
       }
 
-      if (!(bool) ($this->config['enabled'] ?? false)) {
+      if (
+         !(bool) (
+            $this->config['enabled']
+            ?? false
+         )
+      ) {
          return false;
       }
 
       $capability = sanitize_key(
-         (string) ($this->config['capability'] ?? 'manage_options')
+         (string) (
+            $this->config['capability']
+            ?? 'manage_options'
+         )
       );
 
       if (
          $capability === ''
-         || !current_user_can($capability)
+         || !current_user_can(
+            $capability
+         )
       ) {
          return false;
       }
 
       /**
-       * Permite activar o desactivar el Inspector dinámicamente.
+       * Permite activar o desactivar
+       * el Inspector dinámicamente.
        */
       return (bool) apply_filters(
          'fwk_debug_inspector_enabled',
@@ -109,9 +124,11 @@ final class DebugInspector
          return;
       }
 
-      $core = Core::get_instance();
+      $core =
+         Core::get_instance();
 
-      $registry = $core->modules();
+      $registry =
+         $core->modules();
 
       $postTypes =
          PostTypeRegistry::get_instance();
@@ -125,94 +142,114 @@ final class DebugInspector
       $metaBoxRegistry =
          MetaBoxRegistry::get_instance();
 
-      $request = $core->request();
+      $request =
+         $core->request();
 
-      $view = $core->resolve_view();
+      $view =
+         $core->resolve_view();
 
-      $sections = $this->get_sections();
+      $sections =
+         $this->get_sections();
 
       $expanded = (bool) (
          $this->config['expanded']
          ?? false
       );
 
-      $position = $this->get_position();
+      $position =
+         $this->get_position();
 
       ?>
 
-      <aside id="fwk-debug-inspector" class="fwk-debug-inspector fwk-debug-inspector--<?= esc_attr($position); ?>" aria-label="<?php esc_attr_e(
-           'Inspector de WP FRW',
-           'FWK'
-        ); ?>">
+      <aside id="fwk-debug-inspector" class="
+            fwk-debug-inspector
+            fwk-debug-inspector--<?= esc_attr(
+               $position
+            ); ?>
+         " aria-label="<?= esc_attr__(
+            'Inspector de WP FRW',
+            'FWK'
+         ); ?>">
 
-         <details <?= $expanded ? 'open' : ''; ?>>
+         <details <?= $expanded
+            ? 'open'
+            : ''; ?>> <summary>
 
-            <summary>
+            <strong>
+               WP FRW Inspector
+            </strong>
 
-               <strong>
-                  WP FRW Inspector
-               </strong>
-
-               <span class="fwk-debug-status">
-                  <?= esc_html(
-                     sprintf(
-                        '%s · %s',
-                        strtoupper(
-                           $request->get_type()
-                        ),
-                        $view->string(
-                           'modulo',
-                           'sin módulo'
-                        )
+            <span class="fwk-debug-status">
+               <?= esc_html(
+                  sprintf(
+                     '%s · %s',
+                     strtoupper(
+                        $request->get_type()
+                     ),
+                     $view->string(
+                        'modulo',
+                        'sin módulo'
                      )
-                  ); ?>
-               </span>
+                  )
+               ); ?>
+            </span>
 
             </summary>
 
             <div class="fwk-debug-content">
 
                <?php if ($sections['core']): ?>
+
                   <?php
                   $this->render_core_section(
                      $core
                   );
                   ?>
+
                <?php endif; ?>
 
                <?php if ($sections['modules']): ?>
+
                   <?php
                   $this->render_modules_section(
                      $registry
                   );
                   ?>
+
                <?php endif; ?>
 
                <?php if ($sections['post_types']): ?>
+
                   <?php
                   $this->render_post_types_section(
                      $postTypes
                   );
                   ?>
+
                <?php endif; ?>
 
                <?php if ($sections['taxonomies']): ?>
+
                   <?php
                   $this->render_taxonomies_section(
                      $taxonomies
                   );
                   ?>
+
                <?php endif; ?>
 
                <?php if ($sections['metadata']): ?>
+
                   <?php
                   $this->render_meta_section(
                      $metaRegistry
                   );
                   ?>
+
                <?php endif; ?>
 
                <?php if ($sections['metaboxes']): ?>
+
                   <?php
                   $this->render_metaboxes_section(
                      $metaBoxRegistry
@@ -222,35 +259,35 @@ final class DebugInspector
                <?php endif; ?>
 
                <?php if ($sections['request']): ?>
+
                   <?php
                   $this->render_request_section(
                      $request
                   );
                   ?>
-               <?php endif; ?>
 
-               <?php if ($sections['ownership']): ?>
-                  <?php
-                  $this->render_ownership_section();
-                  ?>
                <?php endif; ?>
 
                <?php if ($sections['view']): ?>
+
                   <?php
                   $this->render_view_section(
                      $view
                   );
                   ?>
+
                <?php endif; ?>
 
                <?php if (
                   $sections['view_history']
                ): ?>
+
                   <?php
                   $this->render_view_history_section(
                      $view
                   );
                   ?>
+
                <?php endif; ?>
 
             </div>
@@ -263,33 +300,42 @@ final class DebugInspector
 
       $this->render_styles();
    }
+
    /**
     * Sección del Core.
     */
    private function render_core_section(
       Core $core
    ): void {
-      $elapsed = microtime(true) - $this->startedAt;
+      $elapsed =
+         microtime(true)
+         - $this->startedAt;
 
       $rows = [
-         'Estado' => $core->is_booted()
+         'Estado' =>
+            $core->is_booted()
             ? 'Inicializado'
             : 'No inicializado',
 
-         'Clase' => $core::class,
+         'Clase' =>
+               $core::class,
 
-         'Tiempo Inspector' => number_format(
-            $elapsed * 1000,
-            2
-         ) . ' ms',
+         'Tiempo Inspector' =>
+            number_format(
+               $elapsed * 1000,
+               2
+            )
+            . ' ms',
 
-         'Memoria actual' => size_format(
-            memory_get_usage(true)
-         ),
+         'Memoria actual' =>
+            size_format(
+               memory_get_usage(true)
+            ),
 
-         'Memoria máxima' => size_format(
-            memory_get_peak_usage(true)
-         ),
+         'Memoria máxima' =>
+            size_format(
+               memory_get_peak_usage(true)
+            ),
       ];
 
       $this->render_section(
@@ -297,82 +343,158 @@ final class DebugInspector
          $rows
       );
    }
+
    /**
     * Sección de módulos.
     */
-
    private function render_modules_section(
       ModuleRegistry $registry
    ): void {
+      $errors =
+         $registry
+            ->get_validation_errors();
+
+      $warnings =
+         $registry
+            ->get_validation_warnings();
+
       ?>
+
       <section class="fwk-debug-section">
+
          <h3>
-            <?= esc_html__('Módulos', 'FWK'); ?>
+            <?= esc_html__(
+               'Módulos',
+               'FWK'
+            ); ?>
          </h3>
-         <?php
-         $errors = $registry->get_validation_errors();
-         $warnings = $registry->get_validation_warnings();
-         ?>
 
          <div class="fwk-debug-table-wrapper">
+
             <table>
+
                <tbody>
+
                   <tr>
+
                      <th>
-                        <?= esc_html__('Estado Registry', 'FWK'); ?>
+                        <?= esc_html__(
+                           'Estado Registry',
+                           'FWK'
+                        ); ?>
                      </th>
 
                      <td>
-                        <?php if ($registry->is_booted()): ?>
+
+                        <?php if (
+                           $registry->is_booted()
+                        ): ?>
+
                            <span class="fwk-debug-ok">
-                              <?= esc_html__('Inicializado', 'FWK'); ?>
+                              <?= esc_html__(
+                                 'Inicializado',
+                                 'FWK'
+                              ); ?>
                            </span>
+
                         <?php else: ?>
+
                            <span class="fwk-debug-warning">
-                              <?= esc_html__('No inicializado', 'FWK'); ?>
+                              <?= esc_html__(
+                                 'No inicializado',
+                                 'FWK'
+                              ); ?>
                            </span>
+
                         <?php endif; ?>
+
                      </td>
+
                   </tr>
 
                   <tr>
+
                      <th>
-                        <?= esc_html__('Errores', 'FWK'); ?>
+                        <?= esc_html__(
+                           'Errores',
+                           'FWK'
+                        ); ?>
                      </th>
 
                      <td>
+
                         <?php if ($errors === []): ?>
+
                            <span class="fwk-debug-ok">
-                              <?= esc_html__('Ninguno', 'FWK'); ?>
+                              <?= esc_html__(
+                                 'Ninguno',
+                                 'FWK'
+                              ); ?>
                            </span>
+
                         <?php else: ?>
-                           <?= esc_html((string) count($errors)); ?>
+
+                           <?= esc_html(
+                              (string) count(
+                                 $errors
+                              )
+                           ); ?>
+
                         <?php endif; ?>
+
                      </td>
+
                   </tr>
 
                   <tr>
+
                      <th>
-                        <?= esc_html__('Advertencias', 'FWK'); ?>
+                        <?= esc_html__(
+                           'Advertencias',
+                           'FWK'
+                        ); ?>
                      </th>
 
                      <td>
-                        <?php if ($warnings === []): ?>
+
+                        <?php if (
+                           $warnings === []
+                        ): ?>
+
                            <span class="fwk-debug-ok">
-                              <?= esc_html__('Ninguna', 'FWK'); ?>
+                              <?= esc_html__(
+                                 'Ninguna',
+                                 'FWK'
+                              ); ?>
                            </span>
+
                         <?php else: ?>
-                           <?= esc_html((string) count($warnings)); ?>
+
+                           <?= esc_html(
+                              (string) count(
+                                 $warnings
+                              )
+                           ); ?>
+
                         <?php endif; ?>
+
                      </td>
+
                   </tr>
+
                </tbody>
+
             </table>
+
          </div>
 
-         <?php if ($registry->get_validation_errors() !== []): ?>
+         <?php if ($errors !== []): ?>
 
-            <div class="fwk-debug-validation fwk-debug-validation--error">
+            <div class="
+                  fwk-debug-validation
+                  fwk-debug-validation--error
+               ">
+
                <h4>
                   <?= esc_html__(
                      'Errores de módulos',
@@ -381,22 +503,33 @@ final class DebugInspector
                </h4>
 
                <ul>
+
                   <?php foreach (
-                     $registry->get_validation_errors()
+                     $errors
                      as $error
                   ): ?>
+
                      <li>
-                        <?= esc_html($error); ?>
+                        <?= esc_html(
+                           $error
+                        ); ?>
                      </li>
+
                   <?php endforeach; ?>
+
                </ul>
+
             </div>
 
          <?php endif; ?>
 
-         <?php if ($registry->get_validation_warnings() !== []): ?>
+         <?php if ($warnings !== []): ?>
 
-            <div class="fwk-debug-validation fwk-debug-validation--warning">
+            <div class="
+                  fwk-debug-validation
+                  fwk-debug-validation--warning
+               ">
+
                <h4>
                   <?= esc_html__(
                      'Advertencias de módulos',
@@ -405,20 +538,29 @@ final class DebugInspector
                </h4>
 
                <ul>
+
                   <?php foreach (
-                     $registry->get_validation_warnings()
+                     $warnings
                      as $warning
                   ): ?>
+
                      <li>
-                        <?= esc_html($warning); ?>
+                        <?= esc_html(
+                           $warning
+                        ); ?>
                      </li>
+
                   <?php endforeach; ?>
+
                </ul>
+
             </div>
 
          <?php endif; ?>
 
-         <?php if ($registry->all() === []): ?>
+         <?php if (
+            $registry->all() === []
+         ): ?>
 
             <p class="fwk-debug-warning">
                <?= esc_html__(
@@ -428,12 +570,18 @@ final class DebugInspector
             </p>
 
          <?php else: ?>
+
             <?php
-            $bootOrder = $registry->get_boot_order();
+            $bootOrder =
+               $registry->get_boot_order();
             ?>
 
-            <?php if ($bootOrder !== []): ?>
+            <?php if (
+               $bootOrder !== []
+            ): ?>
+
                <p>
+
                   <strong>
                      <?= esc_html__(
                         'Orden de arranque:',
@@ -442,66 +590,121 @@ final class DebugInspector
                   </strong>
 
                   <?= esc_html(
-                     implode(' → ', $bootOrder)
+                     implode(
+                        ' → ',
+                        $bootOrder
+                     )
                   ); ?>
+
                </p>
+
             <?php endif; ?>
 
             <div class="fwk-debug-table-wrapper">
+
                <table>
+
                   <thead>
+
                      <tr>
+
                         <th>
-                           <?= esc_html__('Slug', 'FWK'); ?>
+                           <?= esc_html__(
+                              'Slug',
+                              'FWK'
+                           ); ?>
                         </th>
+
                         <th>
-                           <?= esc_html__('Nombre', 'FWK'); ?>
+                           <?= esc_html__(
+                              'Nombre',
+                              'FWK'
+                           ); ?>
                         </th>
+
                         <th>
-                           <?= esc_html__('Clase', 'FWK'); ?>
+                           <?= esc_html__(
+                              'Clase',
+                              'FWK'
+                           ); ?>
                         </th>
+
                         <th>
-                           <?= esc_html__('Post types', 'FWK'); ?>
+                           <?= esc_html__(
+                              'Post types',
+                              'FWK'
+                           ); ?>
                         </th>
+
                         <th>
-                           <?= esc_html__('Páginas', 'FWK'); ?>
+                           <?= esc_html__(
+                              'Páginas',
+                              'FWK'
+                           ); ?>
                         </th>
+
                         <th>
-                           <?= esc_html__('Versión', 'FWK'); ?>
+                           <?= esc_html__(
+                              'Versión',
+                              'FWK'
+                           ); ?>
                         </th>
+
                         <th>
-                           <?= esc_html__('Dependencias', 'FWK'); ?>
+                           <?= esc_html__(
+                              'Dependencias',
+                              'FWK'
+                           ); ?>
                         </th>
+
                      </tr>
+
                   </thead>
 
                   <tbody>
-                     <?php foreach ($registry->all() as $slug => $module): ?>
+
+                     <?php foreach (
+                        $registry->all()
+                        as $slug => $module
+                     ): ?>
+
                         <?php
-                        if (!$module instanceof ModuleInterface) {
+                        if (
+                           !$module
+                           instanceof ModuleInterface
+                        ) {
                            continue;
                         }
                         ?>
+
                         <tr>
+
                            <td>
-                              <?= esc_html($slug); ?>
+                              <?= esc_html(
+                                 $slug
+                              ); ?>
                            </td>
 
                            <td>
-                              <?= esc_html($module->get_name()); ?>
+                              <?= esc_html(
+                                 $module->get_name()
+                              ); ?>
                            </td>
 
                            <td>
                               <code>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <?= esc_html($module::class); ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           </code>
+                                                         <?= esc_html(
+                                                               $module::class
+                                                         ); ?>
+                                                      </code>
                            </td>
 
                            <td>
                               <?= esc_html(
                                  implode(
                                     ', ',
-                                    $module->get_post_types()
+                                    $module
+                                       ->get_post_types()
                                  )
                               ); ?>
                            </td>
@@ -510,14 +713,17 @@ final class DebugInspector
                               <?= esc_html(
                                  implode(
                                     ', ',
-                                    $module->get_pages()
+                                    $module
+                                       ->get_pages()
                                  )
                               ); ?>
                            </td>
 
                            <td>
                               <?= esc_html(
-                                 $module->manifest()->get_version()
+                                 $module
+                                    ->manifest()
+                                    ->get_version()
                               ); ?>
                            </td>
 
@@ -525,37 +731,53 @@ final class DebugInspector
                               <?= esc_html(
                                  implode(
                                     ', ',
-                                    $module->manifest()->get_dependencies()
+                                    $module
+                                       ->manifest()
+                                       ->get_dependencies()
                                  )
                               ); ?>
                            </td>
+
                         </tr>
+
                      <?php endforeach; ?>
+
                   </tbody>
+
                </table>
+
             </div>
 
          <?php endif; ?>
+
       </section>
+
       <?php
    }
+
    /**
-    * Summary of render_post_types_section
-    * @param PostTypeRegistry $registry
-    * @return void
+    * Sección de Post Types.
     */
    private function render_post_types_section(
       PostTypeRegistry $registry
    ): void {
       ?>
+
       <section class="fwk-debug-section">
+
          <h3>
-            <?= esc_html__('Post Types', 'FWK'); ?>
+            <?= esc_html__(
+               'Post Types',
+               'FWK'
+            ); ?>
          </h3>
 
          <div class="fwk-debug-table-wrapper">
+
             <table>
+
                <thead>
+
                   <tr>
                      <th>Slug</th>
                      <th>Módulo</th>
@@ -563,6 +785,7 @@ final class DebugInspector
                      <th>Native</th>
                      <th>REST</th>
                   </tr>
+
                </thead>
 
                <tbody>
@@ -573,21 +796,32 @@ final class DebugInspector
                   ): ?>
 
                      <?php
-                     $registered = in_array(
-                        $slug,
-                        $registry->get_registered(),
-                        true
-                     );
+                     $registered =
+                        in_array(
+                           $slug,
+                           $registry
+                              ->get_registered(),
+                           true
+                        );
                      ?>
 
                      <tr>
+
                         <td>
-                           <code><?= esc_html($slug); ?></code>
+                           <code>
+                                                <?= esc_html(
+                                                   $slug
+                                                ); ?>
+                                             </code>
                         </td>
 
                         <td>
                            <?= esc_html(
-                              $registry->get_owner($slug) ?? '—'
+                              $registry
+                                 ->get_owner(
+                                    $slug
+                                 )
+                              ?? '—'
                            ); ?>
                         </td>
 
@@ -596,10 +830,12 @@ final class DebugInspector
                               $registered
                               ? 'Registrado'
                               : (
-                                 $definition->is_native()
+                                 $definition
+                                    ->is_native()
                                  ? 'Nativo'
                                  : (
-                                    $definition->is_enabled()
+                                    $definition
+                                       ->is_enabled()
                                     ? 'Pendiente'
                                     : 'Deshabilitado'
                                  )
@@ -608,45 +844,61 @@ final class DebugInspector
                         </td>
 
                         <td>
-                           <?= $definition->is_native()
+                           <?= $definition
+                              ->is_native()
                               ? 'Sí'
                               : 'No'; ?>
                         </td>
 
                         <td>
                            <?= !empty(
-                              $definition->get_args()['show_in_rest']
+                              $definition
+                                 ->get_args()[
+                                 'show_in_rest'
+                              ]
                            )
                               ? 'Sí'
                               : 'No'; ?>
                         </td>
+
                      </tr>
 
                   <?php endforeach; ?>
 
                </tbody>
+
             </table>
+
          </div>
+
       </section>
+
       <?php
    }
+
    /**
-    * Summary of render_taxonomies_section
-    * @param TaxonomyRegistry $registry
-    * @return void
+    * Sección de Taxonomías.
     */
    private function render_taxonomies_section(
       TaxonomyRegistry $registry
    ): void {
       ?>
+
       <section class="fwk-debug-section">
+
          <h3>
-            <?= esc_html__('Taxonomías', 'FWK'); ?>
+            <?= esc_html__(
+               'Taxonomías',
+               'FWK'
+            ); ?>
          </h3>
 
          <div class="fwk-debug-table-wrapper">
+
             <table>
+
                <thead>
+
                   <tr>
                      <th>Slug</th>
                      <th>Módulo</th>
@@ -655,6 +907,7 @@ final class DebugInspector
                      <th>Object types</th>
                      <th>REST</th>
                   </tr>
+
                </thead>
 
                <tbody>
@@ -665,36 +918,46 @@ final class DebugInspector
                   ): ?>
 
                      <?php
-                     $registered = in_array(
-                        $slug,
-                        $registry->get_registered(),
-                        true
-                     );
+                     $registered =
+                        in_array(
+                           $slug,
+                           $registry
+                              ->get_registered(),
+                           true
+                        );
 
-                     $args = $definition->get_args();
+                     $args =
+                        $definition->get_args();
                      ?>
 
                      <tr>
+
                         <td>
                            <code>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <?= esc_html($slug); ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   </code>
+                                                <?= esc_html(
+                                                   $slug
+                                                ); ?>
+                                             </code>
                         </td>
 
                         <td>
                            <?= esc_html(
-                              $registry->get_owner($slug)
+                              $registry
+                                 ->get_owner(
+                                    $slug
+                                 )
                               ?? '—'
                            ); ?>
                         </td>
 
                         <td>
-                           <?php
-                           echo esc_html(
-                              $definition->is_native()
+                           <?= esc_html(
+                              $definition
+                                 ->is_native()
                               ? 'Nativa'
                               : (
-                                 !$definition->is_enabled()
+                                 !$definition
+                                    ->is_enabled()
                                  ? 'Deshabilitada'
                                  : (
                                     $registered
@@ -702,12 +965,12 @@ final class DebugInspector
                                     : 'Pendiente'
                                  )
                               )
-                           );
-                           ?>
+                           ); ?>
                         </td>
 
                         <td>
-                           <?= $definition->is_hierarchical()
+                           <?= $definition
+                              ->is_hierarchical()
                               ? 'Sí'
                               : 'No'; ?>
                         </td>
@@ -716,66 +979,109 @@ final class DebugInspector
                            <?= esc_html(
                               implode(
                                  ', ',
-                                 $registry->get_object_types(
-                                    $slug
-                                 )
+                                 $registry
+                                    ->get_object_types(
+                                       $slug
+                                    )
                               )
                            ); ?>
                         </td>
 
                         <td>
-                           <?= !empty($args['show_in_rest'])
+                           <?= !empty(
+                              $args[
+                                 'show_in_rest'
+                              ]
+                           )
                               ? 'Sí'
                               : 'No'; ?>
                         </td>
+
                      </tr>
 
                   <?php endforeach; ?>
 
                </tbody>
+
             </table>
+
          </div>
 
-         <?php if ($registry->get_errors() !== []): ?>
-            <h4>Errores</h4>
+         <?php if (
+            $registry->get_errors()
+            !== []
+         ): ?>
+
+            <h4>
+               <?= esc_html__(
+                  'Errores',
+                  'FWK'
+               ); ?>
+            </h4>
 
             <ul>
+
                <?php foreach (
                   $registry->get_errors()
                   as $error
                ): ?>
+
                   <li>
-                     <?= esc_html($error); ?>
+                     <?= esc_html(
+                        $error
+                     ); ?>
                   </li>
+
                <?php endforeach; ?>
+
             </ul>
+
          <?php endif; ?>
 
-         <?php if ($registry->get_warnings() !== []): ?>
-            <h4>Advertencias</h4>
+         <?php if (
+            $registry->get_warnings()
+            !== []
+         ): ?>
+
+            <h4>
+               <?= esc_html__(
+                  'Advertencias',
+                  'FWK'
+               ); ?>
+            </h4>
 
             <ul>
+
                <?php foreach (
                   $registry->get_warnings()
                   as $warning
                ): ?>
+
                   <li>
-                     <?= esc_html($warning); ?>
+                     <?= esc_html(
+                        $warning
+                     ); ?>
                   </li>
+
                <?php endforeach; ?>
+
             </ul>
+
          <?php endif; ?>
 
       </section>
+
       <?php
    }
+
    /**
-    * Sección Temporal Metadata.
+    * Sección de Metadata.
     */
    private function render_meta_section(
       MetaRegistry $registry
    ): void {
       ?>
+
       <section class="fwk-debug-section">
 
          <h3>
@@ -788,7 +1094,9 @@ final class DebugInspector
          <div class="fwk-debug-table-wrapper">
 
             <table>
+
                <thead>
+
                   <tr>
                      <th>Post Type</th>
                      <th>Meta key</th>
@@ -798,74 +1106,89 @@ final class DebugInspector
                      <th>REST</th>
                      <th>Estado</th>
                   </tr>
+
                </thead>
 
                <tbody>
 
                   <?php foreach (
                      $registry->all()
-                     as $postType => $definitions
+                     as $postType =>
+                     $definitions
                   ): ?>
 
                      <?php foreach (
                         $definitions
-                        as $key => $definition
+                        as $key =>
+                        $definition
                      ): ?>
 
                         <?php
-                        $registered = in_array(
-                           $key,
-                           $registry->get_registered(
-                              $postType
-                           ),
-                           true
-                        );
+                        $registered =
+                           in_array(
+                              $key,
+                              $registry
+                                 ->get_registered(
+                                    $postType
+                                 ),
+                              true
+                           );
                         ?>
 
                         <tr>
 
                            <td>
                               <code>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <?= esc_html($postType); ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         </code>
+                                                         <?= esc_html(
+                                                            $postType
+                                                         ); ?>
+                                                      </code>
                            </td>
 
                            <td>
                               <code>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <?= esc_html($key); ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         </code>
+                                                         <?= esc_html(
+                                                            $key
+                                                         ); ?>
+                                                      </code>
                            </td>
 
                            <td>
                               <?= esc_html(
-                                 $registry->get_owner(
-                                    $postType,
-                                    $key
-                                 ) ?? '—'
+                                 $registry
+                                    ->get_owner(
+                                       $postType,
+                                       $key
+                                    )
+                                 ?? '—'
                               ); ?>
                            </td>
 
                            <td>
                               <?= esc_html(
-                                 $definition->get_type()
+                                 $definition
+                                    ->get_type()
                               ); ?>
                            </td>
 
                            <td>
-                              <?= $definition->is_single()
+                              <?= $definition
+                                 ->is_single()
                                  ? 'Sí'
                                  : 'No'; ?>
                            </td>
 
                            <td>
-                              <?= $definition->show_in_rest()
+                              <?= $definition
+                                 ->show_in_rest()
                                  ? 'Sí'
                                  : 'No'; ?>
                            </td>
 
                            <td>
                               <?= esc_html(
-                                 !$definition->is_enabled()
+                                 !$definition
+                                    ->is_enabled()
                                  ? 'Deshabilitado'
                                  : (
                                     $registered
@@ -882,49 +1205,78 @@ final class DebugInspector
                   <?php endforeach; ?>
 
                </tbody>
+
             </table>
 
          </div>
 
-         <?php if ($registry->get_errors() !== []): ?>
+         <?php if (
+            $registry->get_errors()
+            !== []
+         ): ?>
 
-            <h4>Errores</h4>
+            <h4>
+               <?= esc_html__(
+                  'Errores',
+                  'FWK'
+               ); ?>
+            </h4>
 
             <ul>
+
                <?php foreach (
                   $registry->get_errors()
                   as $error
                ): ?>
+
                   <li>
-                     <?= esc_html($error); ?>
+                     <?= esc_html(
+                        $error
+                     ); ?>
                   </li>
+
                <?php endforeach; ?>
+
             </ul>
 
          <?php endif; ?>
 
          <?php if (
-            $registry->get_warnings() !== []
+            $registry->get_warnings()
+            !== []
          ): ?>
 
-            <h4>Advertencias</h4>
+            <h4>
+               <?= esc_html__(
+                  'Advertencias',
+                  'FWK'
+               ); ?>
+            </h4>
 
             <ul>
+
                <?php foreach (
                   $registry->get_warnings()
                   as $warning
                ): ?>
+
                   <li>
-                     <?= esc_html($warning); ?>
+                     <?= esc_html(
+                        $warning
+                     ); ?>
                   </li>
+
                <?php endforeach; ?>
+
             </ul>
 
          <?php endif; ?>
 
       </section>
+
       <?php
    }
+
    /**
     * Sección de Metaboxes.
     */
@@ -932,6 +1284,7 @@ final class DebugInspector
       MetaBoxRegistry $registry
    ): void {
       ?>
+
       <section class="fwk-debug-section">
 
          <h3>
@@ -946,6 +1299,7 @@ final class DebugInspector
             <table>
 
                <thead>
+
                   <tr>
                      <th>ID</th>
                      <th>Módulo</th>
@@ -955,38 +1309,49 @@ final class DebugInspector
                      <th>Campos</th>
                      <th>Estado</th>
                   </tr>
+
                </thead>
 
                <tbody>
 
                   <?php foreach (
                      $registry->all()
-                     as $id => $definition
+                     as $id =>
+                     $definition
                   ): ?>
 
                      <?php
-                     $registered = in_array(
-                        $id,
-                        $registry->get_registered(),
-                        true
-                     );
+                     $registered =
+                        in_array(
+                           $id,
+                           $registry
+                              ->get_registered(),
+                           true
+                        );
 
-                     $fields = array_keys(
-                        $definition->get_fields()
-                     );
+                     $fields =
+                        array_keys(
+                           $definition
+                              ->get_fields()
+                        );
                      ?>
 
                      <tr>
 
                         <td>
                            <code>
-                                                                                                                                                                                                                                                                                                               <?= esc_html($id); ?>
-                                                                                                                                                                                                                                                                                                            </code>
+                                                <?= esc_html(
+                                                   $id
+                                                ); ?>
+                                             </code>
                         </td>
 
                         <td>
                            <?= esc_html(
-                              $registry->get_owner($id)
+                              $registry
+                                 ->get_owner(
+                                    $id
+                                 )
                               ?? '—'
                            ); ?>
                         </td>
@@ -995,20 +1360,23 @@ final class DebugInspector
                            <?= esc_html(
                               implode(
                                  ', ',
-                                 $definition->get_post_types()
+                                 $definition
+                                    ->get_post_types()
                               )
                            ); ?>
                         </td>
 
                         <td>
                            <?= esc_html(
-                              $definition->get_context()
+                              $definition
+                                 ->get_context()
                            ); ?>
                         </td>
 
                         <td>
                            <?= esc_html(
-                              $definition->get_priority()
+                              $definition
+                                 ->get_priority()
                            ); ?>
                         </td>
 
@@ -1016,19 +1384,24 @@ final class DebugInspector
                            <?= esc_html(
                               $fields === []
                               ? '—'
-                              : implode(', ', $fields)
+                              : implode(
+                                 ', ',
+                                 $fields
+                              )
                            ); ?>
                         </td>
 
                         <td>
                            <?= esc_html(
-                              !$definition->is_enabled()
+                              !$definition
+                                 ->is_enabled()
                               ? 'Deshabilitado'
                               : (
                                  $registered
                                  ? 'Registrado'
                                  : (
-                                    $registry->is_booted()
+                                    $registry
+                                       ->is_booted()
                                     ? 'Configurado'
                                     : 'Pendiente'
                                  )
@@ -1046,9 +1419,15 @@ final class DebugInspector
 
          </div>
 
-         <?php if ($registry->get_errors() !== []): ?>
+         <?php if (
+            $registry->get_errors()
+            !== []
+         ): ?>
 
-            <div class="fwk-debug-validation fwk-debug-validation--error">
+            <div class="
+                  fwk-debug-validation
+                  fwk-debug-validation--error
+               ">
 
                <h4>
                   <?= esc_html__(
@@ -1065,7 +1444,9 @@ final class DebugInspector
                   ): ?>
 
                      <li>
-                        <?= esc_html($error); ?>
+                        <?= esc_html(
+                           $error
+                        ); ?>
                      </li>
 
                   <?php endforeach; ?>
@@ -1076,9 +1457,15 @@ final class DebugInspector
 
          <?php endif; ?>
 
-         <?php if ($registry->get_warnings() !== []): ?>
+         <?php if (
+            $registry->get_warnings()
+            !== []
+         ): ?>
 
-            <div class="fwk-debug-validation fwk-debug-validation--warning">
+            <div class="
+                  fwk-debug-validation
+                  fwk-debug-validation--warning
+               ">
 
                <h4>
                   <?= esc_html__(
@@ -1095,7 +1482,9 @@ final class DebugInspector
                   ): ?>
 
                      <li>
-                        <?= esc_html($warning); ?>
+                        <?= esc_html(
+                           $warning
+                        ); ?>
                      </li>
 
                   <?php endforeach; ?>
@@ -1107,23 +1496,26 @@ final class DebugInspector
          <?php endif; ?>
 
       </section>
+
       <?php
    }
+
    /**
     * Sección de RequestContext.
     */
    private function render_request_section(
       RequestContext $request
    ): void {
-      $data = $request->to_array();
+      $data =
+         $request->to_array();
 
-      /*
-       * Los flags se presentan en una sección independiente
-       * para facilitar la lectura.
-       */
-      $flags = $data['flags'] ?? [];
+      $flags =
+         $data['flags']
+         ?? [];
 
-      unset($data['flags']);
+      unset(
+         $data['flags']
+      );
 
       $this->render_section(
          __('RequestContext', 'FWK'),
@@ -1131,254 +1523,32 @@ final class DebugInspector
       );
 
       if (is_array($flags)) {
-         $activeFlags = array_keys(
-            array_filter($flags)
-         );
 
-         $this->render_section(
-            __('Request flags activos', 'FWK'),
-            [
-               'flags' => $activeFlags === []
-                  ? 'Ninguno'
-                  : implode(', ', $activeFlags),
-            ]
-         );
-      }
-   }
-   /**
-    * Muestra información de Ownership
-    * para el post actualmente consultado.
-    */
-   private function render_ownership_section(): void
-   {
-      $postId = get_queried_object_id();
-
-      if ($postId <= 0) {
-         $this->render_section(
-            __('Ownership', 'FWK'),
-            [
-               'Estado' =>
-                  'No existe un post individual en esta solicitud.',
-            ]
-         );
-
-         return;
-      }
-
-      $post = get_post($postId);
-
-      if (!$post instanceof \WP_Post) {
-         $this->render_section(
-            __('Ownership', 'FWK'),
-            [
-               'Post ID' => $postId,
-               'Estado' =>
-                  'El objeto consultado no es un WP_Post.',
-            ]
-         );
-
-         return;
-      }
-
-      $ownership =
-         OwnershipService::get_instance();
-
-      /*
-       * Solo mostramos esta sección para
-       * Post Types sujetos a ownership.
-       */
-      if (
-         !$ownership->is_owned_post_type(
-            $post->post_type
-         )
-      ) {
-         $this->render_section(
-            __('Ownership', 'FWK'),
-            [
-               'Post ID' => $postId,
-               'Post Type' => $post->post_type,
-               'Estado' =>
-                  'El Post Type no está sujeto a Ownership SGF.',
-            ]
-         );
-
-         return;
-      }
-
-      $currentUserId =
-         get_current_user_id();
-
-      $ownerId =
-         $ownership->get_owner_id(
-            $postId
-         );
-
-      $isOwner =
-         $ownership->is_owner(
-            $postId
-         );
-
-      $canAccess =
-         $ownership->can_access(
-            $postId
-         );
-
-      $isMovement =
-         $ownership->is_movement_post_type(
-            $post->post_type
-         );
-
-      $walletId = 0;
-      $walletOwnerId = 0;
-      $movementIntegrity = null;
-
-      /*
-       * Libro y Banco heredan relación
-       * estructural con una Billetera.
-       */
-      if ($isMovement) {
-         $walletId =
-            (int) $post->post_parent;
-
-         if ($walletId > 0) {
-            $wallet = get_post(
-               $walletId
+         $activeFlags =
+            array_keys(
+               array_filter(
+                  $flags
+               )
             );
 
-            if (
-               $wallet instanceof \WP_Post
-               && $wallet->post_type === 'billetera'
-            ) {
-               $walletOwnerId =
-                  (int) $wallet->post_author;
-            }
-         }
-
-         $movementIntegrity =
-            $ownership
-               ->validate_movement_ownership(
-                  $postId
-               );
-      }
-
-      ?>
-
-      <section class="fwk-debug-section">
-
-         <h3>
-            <?= esc_html__(
-               'Ownership',
+         $this->render_section(
+            __(
+               'Request flags activos',
                'FWK'
-            ); ?>
-         </h3>
-
-         <table>
-
-            <tbody>
-
-               <tr>
-                  <th>Post ID</th>
-                  <td>
-                     <?= esc_html(
-                        (string) $postId
-                     ); ?>
-                  </td>
-               </tr>
-
-               <tr>
-                  <th>Post Type</th>
-                  <td>
-                     <code>
-                                                                                                                                          <?= esc_html(
-                                                                                                                                             $post->post_type
-                                                                                                                                          ); ?>
-                                                                                                                                       </code>
-                  </td>
-               </tr>
-
-               <tr>
-                  <th>Usuario actual</th>
-                  <td>
-                     <?= esc_html(
-                        (string) $currentUserId
-                     ); ?>
-                  </td>
-               </tr>
-
-               <tr>
-                  <th>Post Author</th>
-                  <td>
-                     <?= esc_html(
-                        (string) $ownerId
-                     ); ?>
-                  </td>
-               </tr>
-
-               <tr>
-                  <th>Propietario</th>
-                  <td>
-                     <?= esc_html(
-                        $isOwner
-                        ? 'Sí'
-                        : 'No'
-                     ); ?>
-                  </td>
-               </tr>
-
-               <?php if ($isMovement): ?>
-
-                  <tr>
-                     <th>Post Parent</th>
-                     <td>
-                        <?= esc_html(
-                           (string) $walletId
-                        ); ?>
-                     </td>
-                  </tr>
-
-                  <tr>
-                     <th>Autor billetera</th>
-                     <td>
-                        <?= esc_html(
-                           $walletOwnerId > 0
-                           ? (string) $walletOwnerId
-                           : '—'
-                        ); ?>
-                     </td>
-                  </tr>
-
-                  <tr>
-                     <th>Integridad movimiento</th>
-                     <td>
-                        <?= esc_html(
-                           $movementIntegrity
-                           ? 'Válida'
-                           : 'Inválida'
-                        ); ?>
-                     </td>
-                  </tr>
-
-               <?php endif; ?>
-
-               <tr>
-                  <th>Acceso</th>
-                  <td>
-                     <?= esc_html(
-                        $canAccess
-                        ? 'Permitido'
-                        : 'Denegado'
-                     ); ?>
-                  </td>
-               </tr>
-
-            </tbody>
-
-         </table>
-
-      </section>
-
-      <?php
+            ),
+            [
+               'flags' =>
+                  $activeFlags === []
+                  ? 'Ninguno'
+                  : implode(
+                     ', ',
+                     $activeFlags
+                  ),
+            ]
+         );
+      }
    }
+
    /**
     * Sección de ViewContext.
     */
@@ -1393,31 +1563,25 @@ final class DebugInspector
          'post_slug',
          'taxonomy',
          'term_slug',
-         'titulo',
-         'subtitulo',
-         'main',
-         'article',
-         'asideL',
-         'asideR',
+         'paged',
+         'html',
+         'body',
          't_navbar',
-         't_banner',
          't_main',
          't_none',
-         't_asideL',
-         't_asideR',
-         't_footer',
-         'paginacion',
-         'comentarios',
-         'show_content',
       ];
 
       $rows = [];
 
-      foreach ($importantKeys as $key) {
-         $rows[$key] = $view->get(
-            $key,
-            '—'
-         );
+      foreach (
+         $importantKeys
+         as $key
+      ) {
+         $rows[$key] =
+            $view->get(
+               $key,
+               '—'
+            );
       }
 
       $this->render_section(
@@ -1432,12 +1596,18 @@ final class DebugInspector
    private function render_view_history_section(
       ViewContext $view
    ): void {
-      $history = $view->history();
+      $history =
+         $view->history();
 
       ?>
+
       <section class="fwk-debug-section">
+
          <h3>
-            <?= esc_html__('Historial de ViewContext', 'FWK'); ?>
+            <?= esc_html__(
+               'Historial de ViewContext',
+               'FWK'
+            ); ?>
          </h3>
 
          <?php if ($history === []): ?>
@@ -1451,28 +1621,41 @@ final class DebugInspector
 
          <?php else: ?>
 
-            <?php foreach ($history as $index => $entry): ?>
+            <?php foreach (
+               $history
+               as $index => $entry
+            ): ?>
+
                <details class="fwk-debug-history-entry">
+
                   <summary>
                      <?= esc_html(
                         sprintf(
                            '#%d · %s',
                            $index + 1,
-                           (string) ($entry['source'] ?? 'desconocido')
+                           (string) (
+                              $entry['source']
+                              ?? 'desconocido'
+                           )
                         )
                      ); ?>
                   </summary>
 
                   <pre><?= esc_html(
                      $this->format_value(
-                        $entry['values'] ?? []
+                        $entry['values']
+                        ?? []
                      )
                   ); ?></pre>
+
                </details>
+
             <?php endforeach; ?>
 
          <?php endif; ?>
+
       </section>
+
       <?php
    }
 
@@ -1486,31 +1669,57 @@ final class DebugInspector
       array $rows
    ): void {
       ?>
+
       <section class="fwk-debug-section">
+
          <h3>
-            <?= esc_html($title); ?>
+            <?= esc_html(
+               $title
+            ); ?>
          </h3>
 
          <div class="fwk-debug-table-wrapper">
+
             <table>
+
                <tbody>
-                  <?php foreach ($rows as $label => $value): ?>
+
+                  <?php foreach (
+                     $rows
+                     as $label => $value
+                  ): ?>
+
                      <tr>
+
                         <th>
-                           <?= esc_html((string) $label); ?>
+                           <?= esc_html(
+                              (string) $label
+                           ); ?>
                         </th>
 
                         <td>
-                           <?php $this->render_value($value); ?>
+                           <?php
+                           $this->render_value(
+                              $value
+                           );
+                           ?>
                         </td>
+
                      </tr>
+
                   <?php endforeach; ?>
+
                </tbody>
+
             </table>
+
          </div>
+
       </section>
+
       <?php
    }
+
    /**
     * Renderiza un valor de forma segura.
     */
@@ -1525,39 +1734,55 @@ final class DebugInspector
          return;
       }
 
-      if ($value === null || $value === '') {
+      if (
+         $value === null
+         || $value === ''
+      ) {
          echo '<span class="fwk-debug-muted">—</span>';
 
          return;
       }
 
-      if (is_array($value) || is_object($value)) {
+      if (
+         is_array($value)
+         || is_object($value)
+      ) {
          ?>
+
          <pre><?= esc_html(
-            $this->format_value($value)
+            $this->format_value(
+               $value
+            )
          ); ?></pre>
+
          <?php
 
          return;
       }
 
-      echo esc_html((string) $value);
+      echo esc_html(
+         (string) $value
+      );
    }
 
    /**
-    * Convierte valores complejos a JSON legible.
+    * Convierte valores complejos
+    * a JSON legible.
     */
    private function format_value(
       mixed $value
    ): string {
-      $encoded = wp_json_encode(
-         $value,
-         JSON_PRETTY_PRINT
-         | JSON_UNESCAPED_UNICODE
-         | JSON_UNESCAPED_SLASHES
-      );
+      $encoded =
+         wp_json_encode(
+            $value,
+            JSON_PRETTY_PRINT
+            | JSON_UNESCAPED_UNICODE
+            | JSON_UNESCAPED_SLASHES
+         );
 
-      return is_string($encoded)
+      return is_string(
+         $encoded
+      )
          ? $encoded
          : '';
    }
@@ -1579,20 +1804,25 @@ final class DebugInspector
          'metaboxes' => true,
 
          'request' => true,
-         'ownership' => true,
 
          'view' => true,
          'view_history' => true,
       ];
 
-      $configured = $this->config['sections'] ?? [];
+      $configured =
+         $this->config['sections']
+         ?? [];
 
       if (!is_array($configured)) {
          return $defaults;
       }
 
       return array_map(
-         static fn(mixed $value): bool => (bool) $value,
+         static fn(
+         mixed $value
+      ): bool =>
+         (bool) $value,
+
          array_replace(
             $defaults,
             $configured
@@ -1605,13 +1835,20 @@ final class DebugInspector
     */
    private function get_position(): string
    {
-      $position = sanitize_key(
-         (string) ($this->config['position'] ?? 'bottom')
-      );
+      $position =
+         sanitize_key(
+            (string) (
+               $this->config['position']
+               ?? 'bottom'
+            )
+         );
 
       return in_array(
          $position,
-         ['top', 'bottom'],
+         [
+            'top',
+            'bottom',
+         ],
          true
       )
          ? $position
@@ -1625,7 +1862,8 @@ final class DebugInspector
     */
    private function load_config(): array
    {
-      $file = get_template_directory()
+      $file =
+         get_template_directory()
          . '/config/debug.php';
 
       if (!is_readable($file)) {
@@ -1634,7 +1872,8 @@ final class DebugInspector
          ];
       }
 
-      $config = require $file;
+      $config =
+         require $file;
 
       if (!is_array($config)) {
          return [
@@ -1648,11 +1887,13 @@ final class DebugInspector
    /**
     * Estilos básicos del Inspector.
     *
-    * Posteriormente pueden moverse a un archivo CSS.
+    * Posteriormente pueden moverse
+    * a un archivo CSS.
     */
    private function render_styles(): void
    {
       ?>
+
       <style>
          .fwk-debug-inspector {
             position: fixed;
@@ -1666,8 +1907,14 @@ final class DebugInspector
             border: 1px solid rgba(255, 255, 255, .18);
             border-radius: .5rem;
             box-shadow: 0 0 2rem rgba(0, 0, 0, .4);
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco,
-               Consolas, "Liberation Mono", monospace;
+            font-family:
+               ui-monospace,
+               SFMono-Regular,
+               Menlo,
+               Monaco,
+               Consolas,
+               "Liberation Mono",
+               monospace;
             font-size: 13px;
             line-height: 1.45;
          }
@@ -1702,7 +1949,8 @@ final class DebugInspector
          .fwk-debug-section {
             margin-top: 1rem;
             padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, .14);
+            border-top:
+               1px solid rgba(255, 255, 255, .14);
          }
 
          .fwk-debug-section h3 {
@@ -1725,7 +1973,8 @@ final class DebugInspector
             padding: .45rem .55rem;
             text-align: left;
             vertical-align: top;
-            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            border-bottom:
+               1px solid rgba(255, 255, 255, .08);
          }
 
          .fwk-debug-inspector th {
@@ -1750,7 +1999,8 @@ final class DebugInspector
          .fwk-debug-history-entry {
             margin-bottom: .5rem;
             padding: .5rem;
-            background: rgba(255, 255, 255, .04);
+            background:
+               rgba(255, 255, 255, .04);
             border-radius: .25rem;
          }
 
@@ -1796,17 +2046,22 @@ final class DebugInspector
 
          .fwk-debug-validation--error {
             color: #f1aeb5;
-            background: rgba(220, 53, 69, .16);
-            border: 1px solid rgba(220, 53, 69, .35);
+            background:
+               rgba(220, 53, 69, .16);
+            border:
+               1px solid rgba(220, 53, 69, .35);
          }
 
          .fwk-debug-validation--warning {
             color: #ffe69c;
-            background: rgba(255, 193, 7, .13);
-            border: 1px solid rgba(255, 193, 7, .32);
+            background:
+               rgba(255, 193, 7, .13);
+            border:
+               1px solid rgba(255, 193, 7, .32);
          }
 
          @media (max-width: 767px) {
+
             .fwk-debug-inspector {
                right: .5rem;
                left: .5rem;
@@ -1817,11 +2072,11 @@ final class DebugInspector
 
             .fwk-debug-inspector th {
                width: 120px;
-
             }
          }
 
       </style>
+
       <?php
    }
 }

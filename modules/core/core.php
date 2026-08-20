@@ -26,6 +26,7 @@ final class Core
    private ?RequestContext $request = null;
 
    private ?ViewContext $view = null;
+
    /**
     * Indica si el núcleo terminó su inicialización.
     */
@@ -221,6 +222,7 @@ final class Core
        */
       return $this->modules->resolve($request);
    }
+
    /**
     * Configura la vista cuando ningún módulo atiende la solicitud.
     */
@@ -254,37 +256,21 @@ final class Core
 
          return;
       }
-      $navigation =
-         new NavigationService();
 
       if ($request->is_404()) {
          $view->merge([
-            'titulo' => __('Página no encontrada', 'FWK'),
-            'display' => 'display-6',
-            'subtitulo' => sprintf(
-               '<a href="%s" class="enlaceBlanco">%s</a>',
-               esc_url(
-                  $navigation->get_home_url()
-               ),
-               esc_html__('Volver al inicio', 'FWK')
-            ),
-            'displaysub' => '',
-            'height' => '100dvh',
-            't_main' => '',
-            't_none' => 'modules/core/view/none',
-            'paginacion' => false,
+            't_main' =>
+               'modules/core/view/404',
          ], 'core:fallback:404');
 
          return;
       }
 
       $view->merge([
-         'titulo' => get_the_archive_title(),
-         't_main' => 'modules/core/view/content',
-         'paginacion' => $request->is_archive(),
+         't_main' =>
+            'modules/core/view/content',
       ], 'core:fallback');
    }
-
    /**
     * Registra los módulos activos configurados.
     */

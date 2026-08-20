@@ -6,6 +6,7 @@ namespace FWK\Modules\Post;
 
 use FWK\Modules\Core\AbstractModule;
 use FWK\Modules\Core\Support\Singleton;
+use FWK\Modules\Core\Context\RequestContext;
 
 if (!defined('ABSPATH')) {
    exit;
@@ -24,6 +25,27 @@ final class Post extends AbstractModule
    {
    }
 
+   /**
+    * Determina si el módulo Post
+    * puede atender la solicitud actual.
+    */
+   public function supports(
+      RequestContext $request
+   ): bool {
+
+      /*
+       * La página configurada por WordPress
+       * como índice de entradas pertenece
+       * al módulo Post.
+       */
+      if ($request->is_home()) {
+         return true;
+      }
+
+      return parent::supports(
+         $request
+      );
+   }
    protected function register(): void
    {
       add_action(

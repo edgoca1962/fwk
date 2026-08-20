@@ -572,6 +572,8 @@ final class RequestContext
    private static function resolve_post_type(
       mixed $queriedObject
    ): string {
+
+
       if ($queriedObject instanceof \WP_Post) {
          return sanitize_key($queriedObject->post_type);
       }

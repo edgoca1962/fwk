@@ -29,14 +29,6 @@ $rejectedUsers =
 $suspendedUsers =
    $pageData['users']['suspended'];
 
-$user = get_user_by('id', 18);
-print_r($user->roles);
-echo '<br>';
-
-print_r(user_can(
-   $user,
-   'fwk_manage_users'
-));
 ?>
 
 <section class="container py-5">

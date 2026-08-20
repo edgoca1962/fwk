@@ -12,9 +12,6 @@ return [
     */
    'defaults' => [
       'modulo' => 'post',
-      'asideL' => '',
-      'asideR' => 'col-md-3',
-      't_asideL' => '',
       'frmplaceholder' => __('Buscar artículo', 'FWK'),
       'search' => rest_url('wp/v2/posts?search='),
       'msgsearch' => __(
@@ -27,10 +24,7 @@ return [
     * Página asignada al listado del blog.
     */
    'home' => [
-      'titulo' => __('Blog', 'FWK'),
-      'article' => 'row row-cols-2 row-cols-md-3 row-cols-xxl-4 g-3 mb-3',
-      't_main' => 'modules/post/view/post',
-      'paginacion' => true,
+      't_main' => 'modules/post/view/blog',
    ],
 
    /*
@@ -38,10 +32,7 @@ return [
     */
    'pages' => [
       'blog' => [
-         'titulo' => __('Blog', 'FWK'),
-         'article' => 'row row-cols-2 row-cols-md-3 row-cols-xxl-4 g-3 mb-3',
-         't_main' => 'modules/post/view/post',
-         'paginacion' => true,
+         't_main' => 'modules/post/view/blog',
       ],
 
    ],
@@ -51,35 +42,20 @@ return [
     */
    'post_types' => [
       'post' => [
-         'defaults' => [
-            'titulo' => __('Blog', 'FWK'),
-            'article' => 'row row-cols-2 row-cols-md-3 row-cols-xxl-4 g-3 mb-3',
-         ],
-
          'listing' => [
-            't_main' => 'modules/post/view/post',
-            'paginacion' => true,
+            't_main' => 'modules/post/view/blog',
          ],
 
          'archive' => [
-            't_main' => 'modules/post/view/post',
-            'paginacion' => true,
+            't_main' => 'modules/post/view/blog',
          ],
 
          'singular' => [
-            'titulo' => static fn(): string => get_the_title(),
-            'article' => '',
             't_main' => 'modules/post/view/single',
-            'paginacion' => false,
-            'show_content' => false,
          ],
 
          'search' => [
-            'titulo' => static fn(): string => sprintf(
-               __('Resultados para: %s', 'FWK'),
-               get_search_query()
-            ),
-            't_main' => 'modules/post/view/post',
+            't_main' => 'modules/post/view/blog',
          ],
       ],
    ],
