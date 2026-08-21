@@ -10,6 +10,7 @@ return [
    'login' => [
       't_main' =>
          'modules/core/view/login',
+      't_navbar' => '',
    ],
 
    'solicitar-ingreso' => [

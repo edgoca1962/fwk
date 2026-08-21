@@ -11,17 +11,31 @@ use FWK\Modules\Core\Services\NavigationService;
 $navigation =
    new NavigationService();
 
+$customLogoId =
+   (int) get_theme_mod(
+      'custom_logo'
+   );
+
+$logoUrl =
+   $customLogoId > 0
+   ? wp_get_attachment_image_url(
+      $customLogoId,
+      'full'
+   )
+   : false;
+
 ?>
 
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
+<!-- bg-body-tertiary -->
+<nav id="site-navbar" class="navbar navbar-expand-lg bg-transparent fixed-top mb-5">
    <div class="container">
 
-      <a class="navbar-brand" href="<?= esc_url(
+      <a class="navbar-brand d-flex align-items-center" href="<?= esc_url(
          $navigation->get_home_url()
       ); ?>">
-         <?= esc_html(
-            get_bloginfo('name')
-         ); ?>
+         <img id='site-logo' src="<?= esc_url($logoUrl ?? "") ?>" alt="<?= esc_attr(get_bloginfo('name')); ?>"
+            width="60" height="60" class="d-inline-block align-text-top me-2">
+         <?= esc_html(get_bloginfo('name')); ?>
       </a>
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#fwk-navbar"
@@ -49,3 +63,29 @@ $navigation =
 
    </div>
 </nav>
+<div style="padding-top:72px;"></div>
+<script>
+   const navbar =
+      document.getElementById('site-navbar');
+
+   if (navbar) {
+
+      const updateNavbar = () => {
+
+         navbar.classList.toggle(
+            'navbar-scrolled',
+            window.scrollY > 50
+         );
+
+      };
+
+      updateNavbar();
+
+      window.addEventListener(
+         'scroll',
+         updateNavbar,
+         { passive: true }
+      );
+
+   }
+</script>

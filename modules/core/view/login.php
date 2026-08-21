@@ -23,98 +23,125 @@ $loginError = $auth->handle_login();
 $loginUser = $auth->get_submitted_user();
 $rememberChecked = $auth->is_remember_requested();
 
+$customLogoId =
+   (int) get_theme_mod(
+      'custom_logo'
+   );
+
+$logoUrl =
+   $customLogoId > 0
+   ? wp_get_attachment_image_url(
+      $customLogoId,
+      'full'
+   )
+   : false;
+
 ?>
 
-<section class="container py-5">
+<section class="min-vh-100
+      d-flex
+      align-items-center
+      justify-content-center" style="background: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)), url(<?= esc_url(
+         get_template_directory_uri()
+         . '/assets/img/core/login.jpg'
+      ) ?>) no-repeat center /cover;">
 
-   <div class="row justify-content-center">
+   <div class="container">
 
-      <div class="col-12 col-md-6 col-lg-4">
+      <div class="row justify-content-center">
 
-         <h1 class="mb-4 text-center">
-            <?= esc_html__(
-               'Ingresar',
-               'FWK'
-            ); ?>
-         </h1>
-         <?php if ($loginError !== ''): ?>
+         <div class="col-12 col-md-6 col-lg-4">
 
-            <div class="alert alert-danger">
-               <?= esc_html($loginError); ?>
-            </div>
+            <!-- <h1 class="mb-4 text-center">
+               <?= esc_html__(
+                  'Ingresar',
+                  'FWK'
+               ); ?>
+            </h1> -->
+            <?php if ($loginError !== ''): ?>
 
-         <?php endif; ?>
-         <form id="fwk-login-form" method="post">
-            <?php
-            wp_nonce_field(
-               'fwk_login_action',
-               'fwk_login_nonce'
-            );
-            ?>
-            <div class="mb-3">
+               <div class="alert alert-danger">
+                  <?= esc_html($loginError); ?>
+               </div>
 
-               <label for="fwk-login-user" class="form-label">
-                  <?= esc_html__(
-                     'Correo electrónico o usuario',
-                     'FWK'
-                  ); ?>
-               </label>
-
-               <input type="text" class="form-control" id="fwk-login-user" name="user_login" autocomplete="username"
-                  value="<?= esc_attr($loginUser); ?>" required>
-
-            </div>
-
-            <div class="mb-3">
-
-               <label for="fwk-login-password" class="form-label">
-                  <?= esc_html__('Contraseña', 'FWK'); ?>
-               </label>
-
-               <input type="password" class="form-control" id="fwk-login-password" name="user_password"
-                  autocomplete="current-password" required>
-
-            </div>
-            <div class="form-check mb-3">
-
-               <input class="form-check-input" type="checkbox" value="1" id="fwk-login-remember" name="remember"
-                  <?= checked($rememberChecked, true, false); ?>>
-
-               <label class="form-check-label" for="fwk-login-remember">
-                  <?= esc_html__('Recordarme', 'FWK'); ?>
-               </label>
-
-            </div>
-
-            <div class="d-grid">
-
-               <button type="submit" class="btn btn-primary">
-                  <?= esc_html__('Ingresar', 'FWK'); ?>
-               </button>
-
-            </div>
-
-         </form>
-         <div class="mt-3 text-center">
-
-            <a href="<?= esc_url(
-               wp_lostpassword_url(
-                  home_url('/login')
-               )
-            ); ?>">
-               <?= esc_html__('¿Olvidó su contraseña?', 'FWK'); ?>
-            </a>
-            <div class="mt-2 text-center">
-
-               <a href="<?= esc_url(home_url('/solicitar-ingreso')); ?>">
-                  <?= esc_html__('Solicitar ingreso', 'FWK'); ?>
+            <?php endif; ?>
+            <div class="d-flex mb-3 justify-content-center">
+               <a href="<?= esc_url(site_url('/')) ?>" style="z-index: 5;">
+                  <img id="site-logo" src="<?= esc_url($logoUrl ?? "") ?>" height="auto" width="100" alt="Logo">
                </a>
-
             </div>
+            <form id="fwk-login-form" class="rounded-4 p-5 glass-effect" method="post" style="margin-top:-2.3rem;">
+               <?php
+               wp_nonce_field(
+                  'fwk_login_action',
+                  'fwk_login_nonce'
+               );
+               ?>
+               <div class=" mb-3">
+
+                  <label for="fwk-login-user" class="form-label">
+                     <?= esc_html__(
+                        'Correo electrónico o usuario',
+                        'FWK'
+                     ); ?>
+                  </label>
+
+                  <input type="text" class="form-control" id="fwk-login-user" name="user_login" autocomplete="username"
+                     value="<?= esc_attr($loginUser); ?>" required>
+
+               </div>
+
+               <div class="mb-3">
+
+                  <label for="fwk-login-password" class="form-label">
+                     <?= esc_html__('Contraseña', 'FWK'); ?>
+                  </label>
+
+                  <input type="password" class="form-control" id="fwk-login-password" name="user_password"
+                     autocomplete="current-password" required>
+
+               </div>
+               <div class="form-check mb-3">
+
+                  <input class="form-check-input" type="checkbox" value="1" id="fwk-login-remember" name="remember"
+                     <?= checked($rememberChecked, true, false); ?>>
+
+                  <label class="form-check-label" for="fwk-login-remember">
+                     <?= esc_html__('Recordarme', 'FWK'); ?>
+                  </label>
+
+               </div>
+
+               <div class="d-grid">
+
+                  <button type="submit" class="btn btn-primary">
+                     <?= esc_html__('Ingresar', 'FWK'); ?>
+                  </button>
+
+               </div>
+
+            </form>
+            <div class="mt-3 text-center">
+
+               <a href="<?= esc_url(
+                  wp_lostpassword_url(
+                     home_url('/login')
+                  )
+               ); ?>">
+                  <?= esc_html__('¿Olvidó su contraseña?', 'FWK'); ?>
+               </a>
+               <div class="mt-2 text-center">
+
+                  <a href="<?= esc_url(home_url('/solicitar-ingreso')); ?>">
+                     <?= esc_html__('Solicitar ingreso', 'FWK'); ?>
+                  </a>
+
+               </div>
+            </div>
+
          </div>
 
       </div>
 
    </div>
-
 </section>

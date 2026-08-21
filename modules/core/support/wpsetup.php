@@ -86,7 +86,7 @@ class WPSetup
 
       wp_localize_script(
          'main-script',
-         'FWK_AJAX',
+         'SGF_AJAX',
          [
             'endpoint' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('post_abc'),
