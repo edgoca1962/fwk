@@ -7,6 +7,11 @@ if (!defined('ABSPATH')) {
 }
 
 return [
+   'landing-page' => [
+      't_main' =>
+         'modules/core/view/landing-page',
+   ],
+
    'login' => [
       't_main' =>
          'modules/core/view/login',

@@ -6,9 +6,9 @@ if (!defined('ABSPATH')) {
    exit;
 }
 
-$imageUrl =
-   get_template_directory_uri()
-   . '/assets/img/core/fgh-consulting-header.png';
+$hero =
+   $args['hero']
+   ?? [];
 
 ?>
 
@@ -31,12 +31,12 @@ $imageUrl =
                ">
 
                <img src="<?= esc_url(
-                  $imageUrl
+                  $hero['image_url']
                ); ?>" class="
                      img-fluid
                      w-100
                   " alt="<?= esc_attr__(
-                     'FGH Consulting',
+                     $hero['image_alt'],
                      'FWK'
                   ); ?>">
 
@@ -50,16 +50,27 @@ $imageUrl =
 
                <h1 class="fs-2 mb-3">
 
-                  <?= esc_html__(
-                     'Gobernanza. Eficiencia.',
-                     'FWK'
-                  ); ?>
+                  <span class="text-primary">
+                     <?= esc_html__(
+                        $hero['title1'],
+                        'FWK'
+                     ); ?>
+                  </span>
+
+                  <br>
+
+                  <span>
+                     <?= esc_html__(
+                        $hero['title2'],
+                        'FWK'
+                     ); ?>
+                  </span>
 
                   <br>
 
                   <span class="text-primary">
                      <?= esc_html__(
-                        'Crecimiento',
+                        $hero['title3'],
                         'FWK'
                      ); ?>
                   </span>
@@ -72,7 +83,7 @@ $imageUrl =
                      mb-4
                   ">
                   <?= esc_html__(
-                     'En un entorno donde el volumen de datos y la velocidad del negocio superan con creces las capacidades de los sistemas tradicionales, la gobernanza financiera deja de ser una opción de cumplimiento para convertirse en un imperativo de supervivencia.',
+                     $hero['text'],
                      'FWK'
                   ); ?>
                </p>
@@ -87,7 +98,7 @@ $imageUrl =
                      rounded-pill
                   ">
                   <?= esc_html__(
-                     'Contactar',
+                     $hero['button_text'],
                      'FWK'
                   ); ?>
                </a>

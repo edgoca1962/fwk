@@ -2,20 +2,17 @@
 
 declare(strict_types=1);
 
+use FWK\Modules\Core\Services\LandingPageService;
+
 if (!defined('ABSPATH')) {
       exit;
 }
 
-use FWK\Modules\Core\Services\LandingPageService;
-
 $landingPageService =
       new LandingPageService();
 
-echo '<pre>';
-print_r(
-      $landingPageService->prepare_page()
-);
-echo '</pre>';
+$pageData =
+      $landingPageService->prepare_page();
 
 ?>
 
@@ -23,43 +20,100 @@ echo '</pre>';
 
       <?php
       get_template_part(
-            'modules/core/view/partials/landing-page/hero'
+            'modules/core/view/partials/landing-page/hero',
+            null,
+            [
+                  'hero' =>
+                        $pageData['hero'],
+            ]
       );
       ?>
 
       <?php
       get_template_part(
-            'modules/core/view/partials/landing-page/partners'
+            'modules/core/view/partials/landing-page/partners',
+            null,
+            [
+                  'partners' =>
+                        $pageData['partners'],
+            ]
       );
       ?>
 
       <?php
       get_template_part(
-            'modules/core/view/partials/landing-page/services'
+            'modules/core/view/partials/landing-page/services',
+            null,
+            [
+                  'services' =>
+                        $pageData['services'],
+            ]
       );
       ?>
 
       <?php
       get_template_part(
-            'modules/core/view/partials/landing-page/governance'
+            'modules/core/view/partials/landing-page/strategy',
+            null,
+            [
+                  'strategy' =>
+                        $pageData['strategy'],
+            ]
       );
       ?>
 
       <?php
       get_template_part(
-            'modules/core/view/partials/landing-page/coaching'
+            'modules/core/view/partials/landing-page/integrations',
+            null,
+            [
+                  'integrations' =>
+                        $pageData['integrations'],
+            ]
       );
       ?>
 
       <?php
       get_template_part(
-            'modules/core/view/partials/landing-page/experience'
+            'modules/core/view/partials/landing-page/governance',
+            null,
+            [
+                  'governance' =>
+                        $pageData['governance'],
+            ]
       );
       ?>
 
       <?php
       get_template_part(
-            'modules/core/view/partials/landing-page/contact'
+            'modules/core/view/partials/landing-page/coaching',
+            null,
+            [
+                  'coaching' =>
+                        $pageData['coaching'],
+            ]
+      );
+      ?>
+
+      <?php
+      get_template_part(
+            'modules/core/view/partials/landing-page/experience',
+            null,
+            [
+                  'experience' =>
+                        $pageData['experience'],
+            ]
+      );
+      ?>
+
+      <?php
+      get_template_part(
+            'modules/core/view/partials/landing-page/contact',
+            null,
+            [
+                  'contact' =>
+                        $pageData['contact'],
+            ]
       );
       ?>
 
