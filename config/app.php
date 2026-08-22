@@ -118,4 +118,10 @@ return [
          ],
       ],
    ],
+
+   'mail' => [
+      'from_email' =>
+         'no-reply@fgh-org.org',
+   ],
+
 ];

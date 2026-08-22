@@ -189,10 +189,23 @@ final class ContactService
    private function send(
       array $data
    ): bool {
+      $mail =
+         new MailService();
+
+      $recipientService =
+         new MailRecipientService();
+
       $to =
-         get_option(
-            'admin_email'
+         $recipientService->resolve(
+            'general_admin'
          );
+
+      if ($to === '') {
+         $to =
+            $recipientService->resolve(
+               'wp_admin'
+            );
+      }
 
       $subject =
          sprintf(
@@ -215,22 +228,24 @@ final class ContactService
             $data['mensaje']
          );
 
-      $headers = [
-         'Content-Type: text/plain; charset=UTF-8',
-         sprintf(
-            'Reply-To: %s <%s>',
-            $data['nombre'],
-            $data['email']
-         ),
-      ];
+      return $mail->send([
+         'to' =>
+            $to,
 
-      return wp_mail(
-         $to,
-         $subject,
-         $message,
-         $headers
-      );
+         'subject' =>
+            $subject,
+
+         'message' =>
+            $message,
+
+         'reply_to_name' =>
+            $data['nombre'],
+
+         'reply_to_email' =>
+            $data['email'],
+      ]);
    }
+
    /**
     * Procesa el formulario de contacto.
     *
