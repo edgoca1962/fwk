@@ -255,20 +255,40 @@ final class FilterRequestService
             )
          );
 
+      /*
+       * Si existe paged explícitamente
+       * en GET, tiene prioridad.
+       */
       if (
-         $param === ''
-         || !isset($_GET[$param])
+         $param !== ''
+         && isset($_GET[$param])
       ) {
-         return $default;
+         return max(
+            1,
+            absint(
+               wp_unslash(
+                  $_GET[$param]
+               )
+            )
+         );
       }
 
-      return max(
-         1,
+      /*
+       * Si WordPress ya resolvió una URL
+       * como /blog/page/2/, respetamos
+       * su query var.
+       */
+      $paged =
          absint(
-            wp_unslash(
-               $_GET[$param]
+            get_query_var(
+               'paged'
             )
-         )
-      );
+         );
+
+      if ($paged > 0) {
+         return $paged;
+      }
+
+      return $default;
    }
 }

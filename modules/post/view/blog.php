@@ -8,20 +8,14 @@ if (!defined('ABSPATH')) {
 }
 
 use FWK\Modules\Post\Services\PostViewService;
+use FWK\Modules\Core\Services\FilterConfigService;
+use FWK\Modules\Core\Services\FilterRequestService;
 
 $postView =
    new PostViewService();
 
 $pageData =
    $postView->prepare_blog_page();
-/******************************************************************************
- * 
- * Àrea de pruebas
- * 
- *****************************************************************************/
-use FWK\Modules\Core\Services\FilterConfigService;
-use FWK\Modules\Core\Services\FilterRequestService;
-use FWK\Modules\Core\Services\FilterQueryService;
 
 $filterConfigService =
    new FilterConfigService();
@@ -39,21 +33,11 @@ $filters =
       $filterConfig
    );
 
-$filterQueryService =
-   new FilterQueryService();
-
-$queryArgs =
-   $filterQueryService->build(
-      'post',
-      $filters
-   );
-
-echo '<pre>';
-print_r(
-   $queryArgs
-);
-echo '</pre>';
-
+/******************************************************************************
+ * 
+ * Àrea de pruebas
+ * 
+ *****************************************************************************/
 
 ?>
 
@@ -73,6 +57,20 @@ echo '</pre>';
 
    <?php endif; ?>
 
+   <?php
+   get_template_part(
+      'modules/post/view/partials/blog/filters',
+      null,
+      [
+         'config' =>
+            $filterConfig,
+
+         'filters' =>
+            $filters,
+      ]
+   );
+
+   ?>
 
    <div class="
          row
@@ -103,11 +101,47 @@ echo '</pre>';
       <div class="mt-5">
 
          <?php
+
+         $addArgs = [];
+
+         foreach ($_GET as $key => $value) {
+
+            if (
+               is_scalar($value)
+               && $value !== ''
+            ) {
+               $addArgs[
+                  sanitize_key(
+                     (string) $key
+                  )
+               ] =
+                  sanitize_text_field(
+                     wp_unslash(
+                        (string) $value
+                     )
+                  );
+            }
+
+         }
+
+         unset(
+            $addArgs['paged']
+         );
+
          the_posts_pagination([
-            'prev_text' => '&laquo; Anterior',
-            'mid_size' => 1,
-            'next_text' => 'Siguiente &raquo;',
+            'prev_text' =>
+               '&laquo; Anterior',
+
+            'mid_size' =>
+               1,
+
+            'next_text' =>
+               'Siguiente &raquo;',
+
+            'add_args' =>
+               $addArgs,
          ]);
+
          ?>
 
       </div>
