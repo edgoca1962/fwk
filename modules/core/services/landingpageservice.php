@@ -157,13 +157,23 @@ final class LandingPageService
             ],
 
             [
-               'name' => 'Analytics',
+               'name' => 'Aprender Analytics',
                'url' =>
-                  '#',
+                  'https://aprenderanalytics.com/',
                'image_url' =>
                   $imagePath
                   . 'analitycs.png',
             ],
+            [
+               'name' => 'Inversso',
+               'url' => 'https://inversso.com/',
+               'image_url' => $imagePath . 'inversso.png'
+            ],
+            /*
+            <a class="text-reset" href="https://inversso.com/">
+                  <img class="rounded-3" src="https://sgf.fgh-org.org/wp-content/themes/sgf/assets/img/core/inversso.png" style="width:200px; height:auto;" alt="Inversso">
+               </a>
+            */
          ],
       ];
    }
@@ -598,7 +608,7 @@ final class LandingPageService
                   'Claude',
 
                'url' =>
-                  '#',
+                  'https://claude.ai/',
 
                'image_url' =>
                   $imagePath

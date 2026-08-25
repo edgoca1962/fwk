@@ -46,9 +46,8 @@ return [
        * intente registrarlo nuevamente.
        */
       'post_types' => [
-         'post' => [
-            'native' => true,
-         ],
+         'post' =>
+            'config/post-type.php',
       ],
 
       'taxonomies' => [

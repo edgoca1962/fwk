@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace FWK\Modules\Post;
 
-use FWK\Modules\Core\AbstractModule;
-use FWK\Modules\Core\Support\Singleton;
-use FWK\Modules\Core\Context\RequestContext;
-
 if (!defined('ABSPATH')) {
    exit;
 }
+
+use FWK\Modules\Core\AbstractModule;
+use FWK\Modules\Core\Support\Singleton;
+use FWK\Modules\Core\Context\RequestContext;
+use FWK\Modules\Core\Services\FilterConfigService;
+use FWK\Modules\Core\Services\FilterQueryService;
+use FWK\Modules\Core\Services\FilterRequestService;
 
 /**
  * Módulo para el blog nativo de WordPress.
@@ -49,6 +52,11 @@ final class Post extends AbstractModule
    protected function register(): void
    {
       add_action(
+         'pre_get_posts',
+         [$this, 'apply_filters_to_query']
+      );
+
+      add_action(
          'wp_ajax_eliminar_post',
          [$this, 'eliminar_post']
       );
@@ -56,6 +64,67 @@ final class Post extends AbstractModule
       /*
        * La creación de roles se migrará posteriormente.
        */
+   }
+
+   /**
+    * Aplica los filtros configurados
+    * a la consulta principal del Blog.
+    */
+   public function apply_filters_to_query(
+      \WP_Query $query
+   ): void {
+      if (
+         is_admin()
+         || !$query->is_main_query()
+      ) {
+         return;
+      }
+
+      if (
+         !$query->is_home()
+         && !$query->is_post_type_archive(
+            'post'
+         )
+      ) {
+         return;
+      }
+
+      $configService =
+         new FilterConfigService();
+
+      $requestService =
+         new FilterRequestService();
+
+      $queryService =
+         new FilterQueryService();
+
+      $config =
+         $configService
+            ->load_for_post_type(
+               'post'
+            );
+
+      if ($config === []) {
+         return;
+      }
+
+      $filters =
+         $requestService->resolve(
+            $config
+         );
+
+      $args =
+         $queryService->build(
+            'post',
+            $filters
+         );
+
+      foreach ($args as $key => $value) {
+         $query->set(
+            $key,
+            $value
+         );
+      }
    }
    public function eliminar_post(): void
    {

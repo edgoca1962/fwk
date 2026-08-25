@@ -16,5 +16,5 @@ if (!defined('ABSPATH')) {
  */
 return [
    Post::class,
-   SGF::class,
+   // SGF::class,
 ];
