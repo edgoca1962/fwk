@@ -8,6 +8,9 @@ if (!defined('ABSPATH')) {
    exit;
 }
 
+use FWK\Modules\Core\Services\FilterConfigService;
+use FWK\Modules\Core\Services\FilterRequestService;
+
 /**
  * Prepara datos de presentación
  * para las vistas del módulo Post.
@@ -71,6 +74,46 @@ final class PostViewService
       return [
          'title' =>
             $this->get_blog_title(),
+
+         'filters' =>
+            $this->prepare_filters(),
+      ];
+   }
+
+   /**
+    * Prepara los datos necesarios
+    * para los filtros del Blog.
+    *
+    * @return array<string, mixed>
+    */
+   private function prepare_filters(): array
+   {
+      $configService =
+         new FilterConfigService();
+
+      $requestService =
+         new FilterRequestService();
+
+      $config =
+         $configService
+            ->load_for_post_type(
+               'post'
+            );
+
+      return [
+         'post_type' =>
+            'post',
+
+         'base_url' =>
+            home_url('/blog/'),
+
+         'config' =>
+            $config,
+
+         'filters' =>
+            $requestService->resolve(
+               $config
+            ),
       ];
    }
 }

@@ -6,6 +6,22 @@ if (!defined('ABSPATH')) {
    exit;
 }
 
+$postType =
+   sanitize_key(
+      (string) (
+         $args['post_type']
+         ?? ''
+      )
+   );
+
+$baseUrl =
+   esc_url_raw(
+      (string) (
+         $args['base_url']
+         ?? ''
+      )
+   );
+
 $config =
    $args['config']
    ?? [];
@@ -20,14 +36,6 @@ $searchConfig =
 
 $taxonomyConfig =
    $config['taxonomies']
-   ?? [];
-
-$categoryConfig =
-   $taxonomyConfig['category']
-   ?? [];
-
-$tagConfig =
-   $taxonomyConfig['post_tag']
    ?? [];
 
 $orderConfig =
@@ -80,72 +88,87 @@ $hasActiveFilters =
 
          </div>
 
-         <div class="col-12 col-lg-4">
+         <?php foreach (
+            $taxonomyConfig
+            as $taxonomy => $definition
+         ): ?>
 
-            <?php if (
-               !empty(
-               $categoryConfig['enabled']
+            <?php
+            if (
+               !is_array($definition)
+               || empty(
+               $definition['enabled']
             )
-            ): ?>
+            ) {
+               continue;
+            }
+
+            $param =
+               sanitize_key(
+                  (string) (
+                     $definition['param']
+                     ?? ''
+                  )
+               );
+
+            if ($param === '') {
+               continue;
+            }
+
+            $terms =
+               get_terms([
+                  'taxonomy' =>
+                     $taxonomy,
+
+                  'hide_empty' =>
+                     true,
+               ]);
+
+            if (is_wp_error($terms)) {
+               continue;
+            }
+            ?>
+
+            <div class="col-12 col-lg-4">
 
                <select name="<?= esc_attr(
-                  $categoryConfig['param']
-                  ?? 'categoria'
+                  $param
                ); ?>" class="form-select" aria-label="<?= esc_attr(
-                   $categoryConfig['label']
-                   ?? ''
+                   $definition['label']
+                   ?? $taxonomy
                 ); ?>">
 
                   <option value="">
                      <?= esc_html(
-                        $categoryConfig['label']
-                        ?? ''
+                        $definition['label']
+                        ?? $taxonomy
                      ); ?>
                   </option>
 
-                  <?php
-
-                  $categories =
-                     get_terms([
-                        'taxonomy' =>
-                           'category',
-
-                        'hide_empty' =>
-                           true,
-                     ]);
-
-                  ?>
-
-                  <?php if (
-                     !is_wp_error($categories)
+                  <?php foreach (
+                     $terms as $term
                   ): ?>
 
-                     <?php foreach (
-                        $categories
-                        as $category
-                     ): ?>
+                     <option value="<?= esc_attr(
+                        $term->slug
+                     ); ?>" <?php selected(
+                         $filters['taxonomies'][$taxonomy]
+                         ?? '',
+                         $term->slug
+                      ); ?>>
+                        <?= esc_html(
+                           $term->name
+                        ); ?>
+                     </option>
 
-                        <option value="<?= esc_attr(
-                           $category->slug
-                        ); ?>" <?php selected(
-                            $filters['taxonomies']['category']
-                            ?? '',
-                            $category->slug
-                         ); ?>>
-                           <?= esc_html(
-                              $category->name
-                           ); ?>
-                        </option>
-
-                     <?php endforeach; ?>
-
-                  <?php endif; ?>
+                  <?php endforeach; ?>
 
                </select>
 
-            <?php endif; ?>
+            </div>
 
-         </div>
+         <?php endforeach; ?>
+
 
          <div class="col-12 col-lg-4">
 
@@ -272,13 +295,13 @@ $hasActiveFilters =
                ); ?>
             </button>
 
-            <?php if ($hasActiveFilters): ?>
+            <?php if (
+               $hasActiveFilters
+               && $baseUrl !== ''
+            ): ?>
 
                <a href="<?= esc_url(
-                  get_post_type_archive_link(
-                     'post'
-                  )
-                  ?: home_url('/blog/')
+                  $baseUrl
                ); ?>" class="btn btn-outline-secondary">
                   <?= esc_html__(
                      'Limpiar filtros',

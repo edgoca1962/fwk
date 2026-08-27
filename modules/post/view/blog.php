@@ -8,8 +8,6 @@ if (!defined('ABSPATH')) {
 }
 
 use FWK\Modules\Post\Services\PostViewService;
-use FWK\Modules\Core\Services\FilterConfigService;
-use FWK\Modules\Core\Services\FilterRequestService;
 
 $postView =
    new PostViewService();
@@ -17,21 +15,9 @@ $postView =
 $pageData =
    $postView->prepare_blog_page();
 
-$filterConfigService =
-   new FilterConfigService();
-
-$filterRequestService =
-   new FilterRequestService();
-
-$filterConfig =
-   $filterConfigService->load_for_post_type(
-      'post'
-   );
-
-$filters =
-   $filterRequestService->resolve(
-      $filterConfig
-   );
+$filterData =
+   $pageData['filters']
+   ?? [];
 
 /******************************************************************************
  * 
@@ -58,16 +44,11 @@ $filters =
    <?php endif; ?>
 
    <?php
+
    get_template_part(
       'modules/post/view/partials/blog/filters',
       null,
-      [
-         'config' =>
-            $filterConfig,
-
-         'filters' =>
-            $filters,
-      ]
+      $filterData,
    );
 
    ?>
