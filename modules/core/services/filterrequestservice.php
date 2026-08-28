@@ -80,17 +80,31 @@ final class FilterRequestService
          );
 
       if (
-         $param === ''
-         || !isset($_GET[$param])
+         $param !== ''
+         && isset($_GET[$param])
       ) {
-         return '';
+         return sanitize_text_field(
+            wp_unslash(
+               (string) $_GET[$param]
+            )
+         );
       }
 
-      return sanitize_text_field(
-         wp_unslash(
-            (string) $_GET[$param]
-         )
-      );
+      $nativeSearch =
+         get_query_var(
+            's'
+         );
+
+      if (
+         is_string($nativeSearch)
+         && $nativeSearch !== ''
+      ) {
+         return sanitize_text_field(
+            $nativeSearch
+         );
+      }
+
+      return '';
    }
 
    /**

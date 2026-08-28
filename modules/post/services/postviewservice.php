@@ -46,16 +46,41 @@ final class PostViewService
 
       if (is_search()) {
          return sprintf(
-            __(
-               'Resultados para: %s',
-               'FWK'
-            ),
+            __('Resultados para: %s', 'FWK'),
             get_search_query()
          );
       }
 
-      if (is_archive()) {
-         return get_the_archive_title();
+      if (is_day()) {
+         $year = (int) get_query_var('year');
+         $month = (int) get_query_var('monthnum');
+         $day = (int) get_query_var('day');
+
+         return sprintf(
+            '%02d/%02d/%04d',
+            $day,
+            $month,
+            $year
+         );
+      }
+
+      if (is_month()) {
+         global $wp_locale;
+
+         $year = (int) get_query_var('year');
+         $month = (int) get_query_var('monthnum');
+
+         return sprintf(
+            '%s %d',
+            $wp_locale->get_month($month),
+            $year
+         );
+      }
+
+      if (is_year()) {
+         return (string) get_query_var(
+            'year'
+         );
       }
 
       return '';
@@ -100,12 +125,29 @@ final class PostViewService
                'post'
             );
 
+      $currentUrl = strtok(
+         home_url(
+            add_query_arg(
+               [],
+               $_SERVER['REQUEST_URI'] ?? '/'
+            )
+         ),
+         '?'
+      );
+
+      $currentUrl = preg_replace(
+         '#/page/\d+/?$#',
+         '/',
+         $currentUrl
+      );
+
+
       return [
          'post_type' =>
             'post',
 
          'base_url' =>
-            home_url('/blog/'),
+            $currentUrl,
 
          'config' =>
             $config,

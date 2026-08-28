@@ -82,9 +82,10 @@ final class Post extends AbstractModule
 
       if (
          !$query->is_home()
-         && !$query->is_post_type_archive(
-            'post'
-         )
+         && !$query->is_post_type_archive('post')
+         && !$query->is_category()
+         && !$query->is_tag()
+         && !$query->is_search()
       ) {
          return;
       }
