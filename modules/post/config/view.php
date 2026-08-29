@@ -31,8 +31,17 @@ return [
     * Páginas funcionales pertenecientes al módulo.
     */
    'pages' => [
+
       'blog' => [
          't_main' => 'modules/post/view/blog',
+      ],
+
+      'nuevo-articulo' => [
+         't_main' => 'modules/post/view/nuevo-articulo',
+      ],
+
+      'editar-articulo' => [
+         't_main' => 'modules/post/view/editar-articulo',
       ],
 
    ],

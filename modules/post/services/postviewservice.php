@@ -96,12 +96,20 @@ final class PostViewService
     */
    public function prepare_blog_page(): array
    {
+      $authorization =
+         new PostAuthorizationService();
+
       return [
          'title' =>
             $this->get_blog_title(),
 
          'filters' =>
             $this->prepare_filters(),
+
+         'actions' => [
+            'create' =>
+               $authorization->can_create(),
+         ],
       ];
    }
 
@@ -157,5 +165,209 @@ final class PostViewService
                $config
             ),
       ];
+   }
+
+   public function prepare_create_form(): array
+   {
+      return [
+         'form_action' =>
+            admin_url('admin-post.php'),
+
+         'action' =>
+            'fwk_create_post',
+
+         'nonce_action' =>
+            'fwk_create_post',
+
+         'nonce_name' =>
+            'fwk_create_post_nonce',
+
+         'title' =>
+            __('Nuevo Artículo', 'FWK'),
+
+         'fields' => [
+            'title' => [
+               'label' =>
+                  __('Título', 'FWK'),
+
+               'name' =>
+                  'title',
+            ],
+
+            'content' => [
+               'label' =>
+                  __('Contenido', 'FWK'),
+
+               'name' =>
+                  'content',
+            ],
+         ],
+
+         'submit_label' =>
+            __('Publicar artículo', 'FWK'),
+      ];
+   }
+
+   /**
+    * Prepara las acciones disponibles
+    * para un artículo.
+    */
+   public function prepare_post_actions(
+      \WP_Post $post
+   ): array {
+
+      $authorization =
+         new PostAuthorizationService();
+
+      return [
+         'edit' =>
+            $authorization->can_edit(
+               $post
+            ),
+
+         'delete' =>
+            $authorization->can_delete(
+               $post
+            ),
+
+         'delete_form_action' =>
+            admin_url(
+               'admin-post.php'
+            ),
+
+         'delete_action' =>
+            'fwk_delete_post',
+
+         'delete_nonce_action' =>
+            'fwk_delete_post_'
+            . $post->ID,
+
+         'delete_nonce_name' =>
+            'fwk_delete_post_nonce',
+      ];
+   }
+
+   public function prepare_edit_form(
+      int $postId
+   ): array {
+
+      $post =
+         get_post(
+            $postId
+         );
+
+      if (
+         !$post instanceof \WP_Post
+         || $post->post_type !== 'post'
+      ) {
+         return [
+            'valid' => false,
+            'authorized' => false,
+            'title' => '',
+            'post' => null,
+         ];
+      }
+      $thumbnailId =
+         get_post_thumbnail_id(
+            $post->ID
+         );
+
+      $thumbnailUrl =
+         $thumbnailId > 0
+         ? wp_get_attachment_image_url(
+            $thumbnailId,
+            'medium_large'
+         )
+         : false;
+
+      $authorization =
+         new PostAuthorizationService();
+
+      return [
+         'valid' => true,
+
+         'authorized' =>
+            $authorization->can_edit(
+               $post
+            ),
+
+         'title' =>
+            sprintf(
+               __(
+                  'Editar Artículo: %s',
+                  'FWK'
+               ),
+               get_the_title(
+                  $post
+               )
+            ),
+
+         'post' =>
+            $post,
+
+         'form_action' =>
+            admin_url(
+               'admin-post.php'
+            ),
+
+         'action' =>
+            'fwk_update_post',
+
+         'nonce_action' =>
+            'fwk_update_post_' . $post->ID,
+
+         'nonce_name' =>
+            'fwk_update_post_nonce',
+
+         'fields' => [
+            'title' => [
+               'label' =>
+                  __('Título', 'FWK'),
+
+               'name' =>
+                  'title',
+
+               'value' =>
+                  $post->post_title,
+            ],
+
+            'content' => [
+               'label' =>
+                  __('Contenido', 'FWK'),
+
+               'name' =>
+                  'content',
+
+               'value' =>
+                  $post->post_content,
+            ],
+         ],
+
+         'featured_image' => [
+            'id' =>
+               $thumbnailId,
+
+            'url' =>
+               is_string($thumbnailUrl)
+               ? $thumbnailUrl
+               : '',
+
+            'label' =>
+               __(
+                  'Imagen destacada',
+                  'FWK'
+               ),
+
+            'name' =>
+               'featured_image',
+         ],
+
+         'submit_label' =>
+            __(
+               'Guardar cambios',
+               'FWK'
+            ),
+      ];
+
    }
 }

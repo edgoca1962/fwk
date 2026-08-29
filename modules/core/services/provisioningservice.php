@@ -578,11 +578,86 @@ final class ProvisioningService
    }
 
    /**
+    * Provisiona las páginas declaradas
+    * por los módulos activos.
+    */
+   public function provision_module_pages(): void
+   {
+      $moduleRegistry =
+         \FWK\Modules\Core\Registry\ModuleRegistry::get_instance();
+
+      foreach ($moduleRegistry->all() as $module) {
+
+         $pages =
+            $module->manifest()->get_pages();
+
+         if (!is_array($pages)) {
+            continue;
+         }
+
+         foreach ($pages as $slug => $pageConfig) {
+
+            $slug =
+               sanitize_title(
+                  (string) $slug
+               );
+
+            if (
+               $slug === ''
+               || !is_array($pageConfig)
+            ) {
+               continue;
+            }
+
+            $title =
+               sanitize_text_field(
+                  (string) (
+                     $pageConfig['title']
+                     ?? ''
+                  )
+               );
+
+            if ($title === '') {
+               continue;
+            }
+
+            /*
+             * Si ya existe una página con ese slug,
+             * respetamos la existente.
+             */
+            $existingPage =
+               get_page_by_path(
+                  $slug,
+                  OBJECT,
+                  'page'
+               );
+
+            if (
+               $existingPage
+               instanceof \WP_Post
+            ) {
+               continue;
+            }
+
+            wp_insert_post([
+               'post_type' => 'page',
+               'post_status' => 'publish',
+               'post_title' => $title,
+               'post_name' => $slug,
+               'post_content' => '',
+            ]);
+         }
+      }
+   }
+
+   /**
     * Ejecuta el provisioning base de la aplicación.
     */
    public function provision(): void
    {
       $this->provision_pages();
+
+      $this->provision_module_pages();
 
       $this->provision_public_menu();
 

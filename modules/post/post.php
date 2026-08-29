@@ -14,6 +14,9 @@ use FWK\Modules\Core\Context\RequestContext;
 use FWK\Modules\Core\Services\FilterConfigService;
 use FWK\Modules\Core\Services\FilterQueryService;
 use FWK\Modules\Core\Services\FilterRequestService;
+use FWK\Modules\Post\Services\PostAuthorizationService;
+use FWK\Modules\Post\Services\PostCrudService;
+
 
 /**
  * Módulo para el blog nativo de WordPress.
@@ -23,10 +26,6 @@ use FWK\Modules\Core\Services\FilterRequestService;
 final class Post extends AbstractModule
 {
    use Singleton;
-
-   protected function __construct()
-   {
-   }
 
    /**
     * Determina si el módulo Post
@@ -57,13 +56,20 @@ final class Post extends AbstractModule
       );
 
       add_action(
-         'wp_ajax_eliminar_post',
-         [$this, 'eliminar_post']
+         'admin_post_fwk_create_post',
+         [$this, 'create_post']
       );
 
-      /*
-       * La creación de roles se migrará posteriormente.
-       */
+      add_action(
+         'admin_post_fwk_update_post',
+         [$this, 'update_post']
+      );
+
+      add_action(
+         'admin_post_fwk_delete_post',
+         [$this, 'delete_post']
+      );
+
    }
 
    /**
@@ -127,33 +133,304 @@ final class Post extends AbstractModule
          );
       }
    }
-   public function eliminar_post(): void
-   {
-      check_ajax_referer(
-         'post_abc',
-         'nonce'
-      );
 
-      if (!current_user_can('delete_posts')) {
-         wp_send_json_error(
-            [
-               'titulo' => __('Permiso denegado', 'FWK'),
-               'msg' => __(
-                  'No tienes autorización para eliminar artículos.',
-                  'FWK'
-               ),
-            ],
-            403
+   public function create_post(): void
+   {
+      if (!is_user_logged_in()) {
+         wp_die(
+            esc_html__(
+               'Debes iniciar sesión para crear artículos.',
+               'FWK'
+            )
          );
       }
 
-      wp_send_json_success([
-         'titulo' => __('Artículo eliminado', 'FWK'),
-         'msg' => __(
-            'El artículo se eliminó correctamente.',
-            'FWK'
-         ),
-         'action' => 'eliminar',
-      ]);
+      $authorization =
+         new PostAuthorizationService();
+
+      if (!$authorization->can_create()) {
+         wp_die(
+            esc_html__(
+               'No tienes autorización para crear artículos.',
+               'FWK'
+            ),
+            '',
+            [
+               'response' => 403,
+            ]
+         );
+      }
+
+      check_admin_referer(
+         'fwk_create_post',
+         'fwk_create_post_nonce'
+      );
+
+      $service =
+         new PostCrudService();
+
+      $result =
+         $service->create($_POST);
+
+      if (is_wp_error($result)) {
+         wp_die(
+            esc_html(
+               $result->get_error_message()
+            )
+         );
+      }
+
+      $url =
+         get_permalink($result);
+
+      if (!is_string($url)) {
+         $url = home_url('/blog/');
+      }
+
+      wp_safe_redirect($url);
+      exit;
    }
+
+   public function update_post(): void
+   {
+      if (
+         !is_user_logged_in()
+      ) {
+         wp_die(
+            esc_html__(
+               'Debes iniciar sesión para editar artículos.',
+               'FWK'
+            ),
+            '',
+            [
+               'response' => 401,
+            ]
+         );
+      }
+
+      $postId =
+         isset($_POST['post_id'])
+         ? absint(
+            $_POST['post_id']
+         )
+         : 0;
+
+      if ($postId <= 0) {
+         wp_die(
+            esc_html__(
+               'El artículo solicitado no es válido.',
+               'FWK'
+            ),
+            '',
+            [
+               'response' => 400,
+            ]
+         );
+      }
+
+      $post =
+         get_post(
+            $postId
+         );
+
+      if (
+         !$post instanceof \WP_Post
+         || $post->post_type !== 'post'
+      ) {
+         wp_die(
+            esc_html__(
+               'El artículo solicitado no existe.',
+               'FWK'
+            ),
+            '',
+            [
+               'response' => 404,
+            ]
+         );
+      }
+
+      $authorization =
+         new PostAuthorizationService();
+
+      if (
+         !$authorization->can_edit(
+            $post
+         )
+      ) {
+         wp_die(
+            esc_html__(
+               'No tienes autorización para editar este artículo.',
+               'FWK'
+            ),
+            '',
+            [
+               'response' => 403,
+            ]
+         );
+      }
+
+      check_admin_referer(
+         'fwk_update_post_'
+         . $postId,
+         'fwk_update_post_nonce'
+      );
+
+      $service =
+         new PostCrudService();
+
+      $result =
+         $service->update(
+            $postId,
+            $_POST
+         );
+
+      if (
+         is_wp_error(
+            $result
+         )
+      ) {
+         wp_die(
+            esc_html(
+               $result
+                  ->get_error_message()
+            )
+         );
+      }
+
+      $url =
+         get_permalink(
+            $result
+         );
+
+      if (
+         !is_string($url)
+         || $url === ''
+      ) {
+         $url =
+            home_url(
+               '/blog/'
+            );
+      }
+
+      wp_safe_redirect(
+         $url
+      );
+
+      exit;
+   }
+
+   public function delete_post(): void
+   {
+      if (
+         !is_user_logged_in()
+      ) {
+         wp_die(
+            esc_html__(
+               'Debes iniciar sesión para eliminar artículos.',
+               'FWK'
+            ),
+            '',
+            [
+               'response' => 401,
+            ]
+         );
+      }
+
+      $postId =
+         isset($_POST['post_id'])
+         ? absint(
+            $_POST['post_id']
+         )
+         : 0;
+
+      if ($postId <= 0) {
+         wp_die(
+            esc_html__(
+               'El artículo solicitado no es válido.',
+               'FWK'
+            ),
+            '',
+            [
+               'response' => 400,
+            ]
+         );
+      }
+
+      $post =
+         get_post(
+            $postId
+         );
+
+      if (
+         !$post instanceof \WP_Post
+         || $post->post_type !== 'post'
+      ) {
+         wp_die(
+            esc_html__(
+               'El artículo solicitado no existe.',
+               'FWK'
+            ),
+            '',
+            [
+               'response' => 404,
+            ]
+         );
+      }
+
+      $authorization =
+         new PostAuthorizationService();
+
+      if (
+         !$authorization->can_delete(
+            $post
+         )
+      ) {
+         wp_die(
+            esc_html__(
+               'No tienes autorización para eliminar este artículo.',
+               'FWK'
+            ),
+            '',
+            [
+               'response' => 403,
+            ]
+         );
+      }
+
+      check_admin_referer(
+         'fwk_delete_post_'
+         . $postId,
+         'fwk_delete_post_nonce'
+      );
+
+      $service =
+         new PostCrudService();
+
+      $result =
+         $service->delete(
+            $postId
+         );
+
+      if (
+         is_wp_error(
+            $result
+         )
+      ) {
+         wp_die(
+            esc_html(
+               $result
+                  ->get_error_message()
+            )
+         );
+      }
+
+      wp_safe_redirect(
+         home_url(
+            '/blog/'
+         )
+      );
+
+      exit;
+   }
+
 }

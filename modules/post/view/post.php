@@ -6,6 +6,23 @@ if (!defined('ABSPATH')) {
    exit;
 }
 
+$actions =
+   is_array($args['actions'] ?? null)
+   ? $args['actions']
+   : [];
+
+$canEdit =
+   (bool) (
+      $actions['edit']
+      ?? false
+   );
+
+$canDelete =
+   (bool) (
+      $actions['delete']
+      ?? false
+   );
+
 ?>
 
 <div class="col">
@@ -149,7 +166,7 @@ if (!defined('ABSPATH')) {
 
          <?php endif; ?>
 
-         <div class="mt-auto">
+         <div class="mt-auto d-flex gap-2 flex-wrap">
 
             <a href="<?= esc_url(
                get_permalink()
@@ -159,6 +176,65 @@ if (!defined('ABSPATH')) {
                   'FWK'
                ); ?>
             </a>
+
+            <?php if ($canEdit): ?>
+
+               <a href="<?= esc_url(
+                  add_query_arg(
+                     [
+                        'post_id' =>
+                           get_the_ID(),
+                     ],
+                     home_url(
+                        '/editar-articulo/'
+                     )
+                  )
+               ); ?>" class="btn btn-outline-secondary btn-sm">
+                  <?= esc_html__(
+                     'Editar',
+                     'FWK'
+                  ); ?>
+               </a>
+
+            <?php endif; ?>
+
+            <?php if ($canDelete): ?>
+
+               <form method="post" action="<?= esc_url(
+                  $actions['delete_form_action']
+                  ?? ''
+               ); ?>" class="d-inline">
+
+                  <input type="hidden" name="action" value="<?= esc_attr(
+                     $actions['delete_action']
+                     ?? ''
+                  ); ?>">
+
+                  <input type="hidden" name="post_id" value="<?= esc_attr(
+                     (string) get_the_ID()
+                  ); ?>">
+
+                  <?php
+                  wp_nonce_field(
+                     $actions[
+                        'delete_nonce_action'
+                     ],
+                     $actions[
+                        'delete_nonce_name'
+                     ]
+                  );
+                  ?>
+
+                  <button type="submit" class="btn btn-outline-danger btn-sm">
+                     <?= esc_html__(
+                        'Eliminar',
+                        'FWK'
+                     ); ?>
+                  </button>
+
+               </form>
+
+            <?php endif; ?>
 
          </div>
 

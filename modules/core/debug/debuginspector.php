@@ -173,30 +173,40 @@ final class DebugInspector
 
          <details <?= $expanded
             ? 'open'
-            : ''; ?>> <summary>
+            : ''; ?>>
+            <summary>
 
-            <strong>
-               WP FRW Inspector
-            </strong>
+               <strong>
+                  WP FRW Inspector
+               </strong>
 
-            <span class="fwk-debug-status">
-               <?= esc_html(
-                  sprintf(
-                     '%s · %s',
-                     strtoupper(
-                        $request->get_type()
-                     ),
-                     $view->string(
-                        'modulo',
-                        'sin módulo'
+               <span class="fwk-debug-status">
+                  <?= esc_html(
+                     sprintf(
+                        '%s · %s',
+                        strtoupper(
+                           $request->get_type()
+                        ),
+                        $view->string(
+                           'modulo',
+                           'sin módulo'
+                        )
                      )
-                  )
-               ); ?>
-            </span>
+                  ); ?>
+               </span>
 
             </summary>
 
             <div class="fwk-debug-content">
+
+               <?php
+
+               /**
+                * Área de pruebas temporales.
+                */
+
+
+               ?>
 
                <?php if ($sections['core']): ?>
 
@@ -693,10 +703,10 @@ final class DebugInspector
 
                            <td>
                               <code>
-                                                         <?= esc_html(
-                                                               $module::class
-                                                         ); ?>
-                                                      </code>
+                                                                                                                                                                                                                                             <?= esc_html(
+                                                                                                                                                                                                                                                   $module::class
+                                                                                                                                                                                                                                             ); ?>
+                                                                                                                                                                                                                                          </code>
                            </td>
 
                            <td>
@@ -809,10 +819,10 @@ final class DebugInspector
 
                         <td>
                            <code>
-                                                <?= esc_html(
-                                                   $slug
-                                                ); ?>
-                                             </code>
+                                                                                                                                                                                       <?= esc_html(
+                                                                                                                                                                                          $slug
+                                                                                                                                                                                       ); ?>
+                                                                                                                                                                                    </code>
                         </td>
 
                         <td>
@@ -934,10 +944,10 @@ final class DebugInspector
 
                         <td>
                            <code>
-                                                <?= esc_html(
-                                                   $slug
-                                                ); ?>
-                                             </code>
+                                                                                                                                                                                       <?= esc_html(
+                                                                                                                                                                                          $slug
+                                                                                                                                                                                       ); ?>
+                                                                                                                                                                                    </code>
                         </td>
 
                         <td>
@@ -1139,18 +1149,18 @@ final class DebugInspector
 
                            <td>
                               <code>
-                                                         <?= esc_html(
-                                                            $postType
-                                                         ); ?>
-                                                      </code>
+                                                                                                                                                                                                                                             <?= esc_html(
+                                                                                                                                                                                                                                                $postType
+                                                                                                                                                                                                                                             ); ?>
+                                                                                                                                                                                                                                          </code>
                            </td>
 
                            <td>
                               <code>
-                                                         <?= esc_html(
-                                                            $key
-                                                         ); ?>
-                                                      </code>
+                                                                                                                                                                                                                                             <?= esc_html(
+                                                                                                                                                                                                                                                $key
+                                                                                                                                                                                                                                             ); ?>
+                                                                                                                                                                                                                                          </code>
                            </td>
 
                            <td>
@@ -1340,10 +1350,10 @@ final class DebugInspector
 
                         <td>
                            <code>
-                                                <?= esc_html(
-                                                   $id
-                                                ); ?>
-                                             </code>
+                                                                                                                                                                                       <?= esc_html(
+                                                                                                                                                                                          $id
+                                                                                                                                                                                       ); ?>
+                                                                                                                                                                                    </code>
                         </td>
 
                         <td>
@@ -2076,6 +2086,7 @@ final class DebugInspector
          }
 
       </style>
+
 
       <?php
    }

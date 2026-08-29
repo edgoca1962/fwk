@@ -29,15 +29,41 @@ $filterData =
 
 <section class="container py-5">
 
+   <?php
+   $canCreate =
+      (bool) (
+         $pageData['actions']['create']
+         ?? false
+      );
+   ?>
+
    <?php if ($pageData['title'] !== ''): ?>
 
       <header class="mb-4">
 
-         <h1>
-            <?= esc_html(
-               $pageData['title']
-            ); ?>
-         </h1>
+         <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <h1 class="mb-0">
+               <?= esc_html(
+                  $pageData['title']
+                  ?? ''
+               ); ?>
+            </h1>
+
+            <?php if ($canCreate): ?>
+               <a href="<?= esc_url(
+                  home_url(
+                     '/nuevo-articulo/'
+                  )
+               ); ?>" class="btn btn-primary">
+                  <?= esc_html__(
+                     'Nuevo Artículo',
+                     'FWK'
+                  ); ?>
+               </a>
+            <?php endif; ?>
+
+         </div>
 
       </header>
 
@@ -67,8 +93,23 @@ $filterData =
             <?php the_post(); ?>
 
             <?php
+            $post =
+               get_post();
+
+            $actions =
+               $post instanceof \WP_Post
+               ? $postView->prepare_post_actions(
+                  $post
+               )
+               : [];
+
             get_template_part(
-               'modules/post/view/post'
+               'modules/post/view/post',
+               null,
+               [
+                  'actions' =>
+                     $actions,
+               ]
             );
             ?>
 

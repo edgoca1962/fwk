@@ -34,9 +34,14 @@ return [
             'title' => 'Blog',
          ],
 
-         'principal' => [
-            'title' => 'Principal',
+         'nuevo-articulo' => [
+            'title' => 'Nuevo Artículo',
          ],
+
+         'editar-articulo' => [
+            'title' => 'Editar Artículo',
+         ],
+
       ],
 
       /*
